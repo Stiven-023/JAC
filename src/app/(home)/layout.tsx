@@ -11,6 +11,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
 
                 <HomeHeader />
                 <main className="flex-1 flex items-center justify-center">{children}</main>
+
                 <MainFooter />
             </body>
 

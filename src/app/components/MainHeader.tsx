@@ -1,6 +1,8 @@
 'use client';
 import { redirect } from 'next/navigation';
 import { FaHome } from 'react-icons/fa';
+import Link from 'next/link'
+
 export default function MainHeader() {
     function handleLogin() {
 
@@ -22,6 +24,8 @@ export default function MainHeader() {
                 <h2>JAC</h2>
                 <p className=''>Junta de accion comunal </p>
                 <h3 className='text-indigo-50 py-2'>Bienvenido a la comunidad JAC!</h3>
+
+
             </div>
         </header >
 
