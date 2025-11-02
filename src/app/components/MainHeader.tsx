@@ -14,7 +14,7 @@ export default function MainHeader() {
         <header className=" shadow-md bg-red-primary max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 flex flex-col w-full">
 
             <div className="flex justify-end w-full pt-2">
-                <button onClick={handleLogin} className='border rounded-md'>iniciar sesión</button>
+                <button onClick={handleLogin} className='border rounded-md'>Iniciar sesión/ Registrarse</button>
             </div>
             <div className='flex flex-col items-center  '>
                 <div className='rounded-full bg-white p-4 mb-2'>
