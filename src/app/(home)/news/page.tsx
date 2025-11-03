@@ -3,7 +3,7 @@ import Card from "@/app/components/Card";
 export default function Page() {
     return (
         <div>
-            <h1 className="text-center mb-4">Eventos</h1>
+            <h1 className="text-center mb-4">Noticias</h1>
             <div className=" whitespace-pre-line grid grid-cols-2 gap-4 text-xs px-60 ">
                 <Card
 
