@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Proyecto Junta de Acción Comunal (JAC)
 
-## Getting Started
+Este repositorio contiene el desarrollo técnico y documental del proyecto **Junta de Acción Comunal (JAC)**.  
+Su propósito es fortalecer la **gestión comunitaria, la participación ciudadana y la comunicación** entre los miembros de la comunidad y su Junta.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Objetivo General
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Diseñar y desarrollar una **plataforma digital** que permita mejorar la **organización, transparencia y comunicación** dentro de una Junta de Acción Comunal, integrando herramientas tecnológicas accesibles para sus integrantes y toda la comunidad.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Objetivos Específicos
 
-## Learn More
+- Facilitar el registro y administración de miembros de la JAC.  
+- Digitalizar los procesos de reuniones, actas y decisiones comunales.  
+- Promover la participación ciudadana mediante una interfaz sencilla y accesible.  
+- Visualizar fácilmente eventos importantes en la comunidad.  
+- Permitir expresar quejas y reclamos de forma directa con la administración.  
+- Fortalecer la visibilidad de la JAC ante la comunidad local.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Integrantes del Proyecto
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Daniel Getial Pulgarín**  
+- **Valentina Sánchez Rosero**  
+- **Stiven Castro Sánchez**  
+- **Andrés Felipe Aristizábal Buriticá**  
+- **Jhonier Alberto Ipia Noscue**
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estructura del Proyecto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+proyecto-jac/
+│
+├── .env.example           → Ejemplo de como deberian de ir las variables de entorno para que funcione correctamente (claves de Supabase).
+├── docs/                  → Documentos oficiales (estatutos, actas, reglamentos).
+├── public/                → Recursos públicos (imágenes, logos, favicon).
+├── src/                   → CÓDIGO FUENTE DE LA APLICACIÓN
+│   ├── app/               → Rutas de Next.js (páginas, layouts, etc.)
+│   │   ├── (auth)/        → Rutas de autenticación (login, registro).
+│   │   │   ├── login/
+│   │   │   └── registro/  → Contiene la UI de registro.
+│   │   └── home/          → Dashboard principal (requiere autenticación).
+│   │
+│   └── lib/               → Lógica central y de conexión (Backend)
+│       └── autenticacion.ts → **Lógica de autenticación, Server Actions y Rollback de Supabase.**
+│
+├── data/                  → Archivos de datos de configuración o iniciales (JSON, CSV).
+└── README.md              → Descripción general del proyecto (este archivo).
+
+
+
+---
+
+## Estado Actual del Proyecto
+
+- [x] Creación del repositorio en GitHub  
+- [x] Configuración de identidad en Git  
+- [x] Organización de estructura de carpetas  
+- [x] Documentación técnica inicial  
+- [x] Desarrollo del prototipo funcional  
+- [x] Implementación de base de datos  
+- [ ] Pruebas y despliegue  

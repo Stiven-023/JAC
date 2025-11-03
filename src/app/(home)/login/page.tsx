@@ -25,10 +25,7 @@ export default function Page() {
                     <option value="admin" className="text-xs">Administrador</option>
                 </select>
                 <button type="submit" className="bg-red-primary text-white rounded-sm px-2 py-1 mt-4">Ingresar</button>
-
             </form>
-
-
         </div>
 
 
