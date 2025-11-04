@@ -11,20 +11,19 @@ export default function MainHeader() {
         redirect('/login');
     }
     return (
-        <header className=" shadow-md bg-red-primary max-w-7xl mx-auto px-4 sm:px-6 lg:px-6 flex flex-col w-full">
+        <header className="flex flex-col shadow-md bg-red-primary  mx-auto px-4  w-full  lg:text-xl ">
 
-            <div className="flex justify-end w-full pt-2">
-                <button onClick={handleLogin} className='border rounded-md'>iniciar sesión</button>
+            <div className="flex justify-end w-full pt-2  lg:text-sm xl:text-2xl">
+                <button onClick={handleLogin} className=' rounded-md'>iniciar sesión</button>
             </div>
-            <div className='flex flex-col items-center  '>
+            <div className='flex flex-col items-center   '>
                 <div className='rounded-full bg-white p-4 mb-2'>
                     <FaHome size={30} color="red" />
 
-                </div>
-                <h2>JAC</h2>
-                <p className=''>Junta de accion comunal </p>
-                <h3 className='text-indigo-50 py-2'>Bienvenido a la comunidad JAC!</h3>
-
+                </div >
+                <h2 className='lg:text-md xl:text-2xl m-0 leading-tight'>JAC</h2>
+                <p className='lg:text-md xl:text-2xl m-0 leading-tight'>Junta de accion comunal </p>
+                <h3 className=' text-indigo-50 py-2 lg:text-md xl:text-2xl'>Bienvenido a la comunidad JAC!</h3>
 
             </div>
         </header >

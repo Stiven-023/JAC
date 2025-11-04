@@ -9,7 +9,7 @@ export default function Page() {
     return (
         <div>
             <h1 className="text-center mb-4">Servicios</h1>
-            <div className="grid grid-cols-2 gap-4 text-xs ">
+            <div className="flex flex-col lg:grid grid-cols-2 gap-4 text-xs ">
                 <ServiceCard icon={FaTools} title=" Solicitar mantenimiento o reparación" description="Reporta daños o solicita manteminimento en zonas comunes" />
                 <ServiceCard icon={FaCommentDots} title=" Solicitar mantenimiento o reparación" description="Reporta daños o solicita manteminimento en zonas comunes" />
                 <ServiceCard icon={CgFileDocument} title=" Solicitar mantenimiento o reparación" description="Reporta daños o solicita manteminimento en zonas comunes" />

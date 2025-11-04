@@ -12,7 +12,7 @@ export default function Page() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-2  gap-8 w-80 items-center mx-auto">
+            <div className="grid grid-cols-2 gap-2 px-2 w-full max-w-screen-md mx-auto lg:grid lg:grid-cols-2 lg:gap-8  items-center xl  ">
                 <div className="bg-[#D9D9D9] rounded-md px-2 py-1 flex flex-col items-center"><FaNewspaper size={60} />Noticias</div>
                 <div className="bg-[#D9D9D9] rounded-md px-2 py-1 flex flex-col items-center"><MdEventNote size={60} /> Eventos</div>
                 <div className="bg-[#D9D9D9] rounded-md px-2 py-1 flex flex-col items-center"><FaCogs size={60} />Service</div>
