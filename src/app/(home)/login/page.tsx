@@ -63,7 +63,7 @@ function SubmitButton({ label, loadingLabel, bgColor }: { label: string, loading
         <button 
             type="submit" 
             disabled={pending}
-            className={`w-full text-white rounded-sm px-2 py-2 mt-4 transition-all disabled:opacity-50 ${bgColor} **cursor-pointer**`}
+            className={`w-full text-white rounded-sm px-2 py-2 mt-4 transition-all disabled:opacity-50 cursor-pointer ${bgColor} `}
         >
             {pending ? loadingLabel : label}
         </button>
