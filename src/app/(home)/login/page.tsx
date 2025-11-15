@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   // Se usa useFormState temporalmente
   const [loginState, loginDispatch] = useActionState(manejarInicioSesion, initialState);
-  const [registerState, registerDispatch] = useFormState(manejarRegistro, initialState);
+  const [registerState, registerDispatch] = useActionState(manejarRegistro, initialState);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
