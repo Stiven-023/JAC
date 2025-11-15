@@ -13,8 +13,13 @@ export default function MainHeader() {
     return (
         <header className="flex flex-col shadow-md bg-red-primary  mx-auto px-4  w-full  lg:text-xl ">
 
+<<<<<<<<< Temporary merge branch 1
+            <div className="flex justify-end w-full pt-2">
+                <button onClick={handleLogin} className='border rounded-md'>Iniciar sesión/ Registrarse</button>
+=========
             <div className="flex justify-end w-full pt-2  lg:text-sm xl:text-2xl">
-                <button onClick={handleLogin} className=' rounded-md'>Iniciar sesión/ Registrarse</button>
+                <button onClick={handleLogin} className=' rounded-md'>iniciar sesión</button>
+>>>>>>>>> Temporary merge branch 2
             </div>
             <div className='flex flex-col items-center   '>
                 <div className='rounded-full bg-white p-4 mb-2'>
