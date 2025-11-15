@@ -130,7 +130,7 @@ export async function registrarUsuario(formData: FormData) {
 }
 
 
-// --- FUNCIÓN DE INICIO DE SESIÓN (Sin cambios)
+
 /**
  * Inicia sesión de un usuario existente.
  */
