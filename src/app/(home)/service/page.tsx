@@ -1,4 +1,4 @@
-import ServiceCard from "@/app/components/ServiceCard";
+import ServiceCard from "@/components/ServiceCard";
 import { Fa500Px } from 'react-icons/fa';
 import { FaTools } from 'react-icons/fa';
 import { FaCommentDots } from 'react-icons/fa';
