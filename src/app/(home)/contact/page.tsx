@@ -1,4 +1,4 @@
-import ContactCard from "@/app/components/ContactCard";
+import ContactCard from "@/components/ContactCard";
 import { GoLocation } from 'react-icons/go';
 import { AiOutlineMail } from 'react-icons/ai';
 
