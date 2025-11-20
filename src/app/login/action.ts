@@ -1,28 +1,27 @@
-// src/app/login/action.ts
 'use server';
-
-import { redirect } from 'next/navigation'; // <-- AGREGADO
 
 import { 
     registrarUsuario, 
-    iniciarSesion 
+    iniciarSesion, 
+    cerrarSesion
 } from '@/lib/autenticacion'; // Importamos las funciones de backend seguro
 
 // Definimos el tipo de estado
 export type State = {
-    message: string;
+    success?: boolean
+    message?: string;
     values?: {
     email?: string;
     password?: string;
     name?: string;
-    id?:number;
-    phone?:number;
-    apartment?: number;
+    id?:string;
+    phone?:string;
+    apartment?: string;
   };
 }
 
 // --- ACCIÓN DE INICIO DE SESIÓN ---
-export async function manejarInicioSesion(prevState: State, formData: FormData): Promise<State> {
+export async function manejarInicioSesion(prevState: State, formData: FormData){
     
     try {
         
@@ -35,12 +34,15 @@ export async function manejarInicioSesion(prevState: State, formData: FormData):
             }
         }
 
-        redirect('/home')
+        return {
+            success : true
+        }
+        
     
     } catch (error) {
         console.log(error);
         return {
-            message : 'algo salio mal'
+            message : 'Algo salio mal '
         }
     }
 
@@ -62,15 +64,42 @@ export async function manejarRegistro(prevState: State, formData: FormData): Pro
         }; 
     }
 
-    console.log(result)
-    
-    // ✅ Éxito: Redirige a / (inicio)
-    redirect('/');
+    return {
+        success: true,
+        message: 'Usuario registrado exitosamente'
+    }
 
     } catch (error) {
         console.error(error)
         return {
             message: 'no se pudo crear el usuario'
         }
+    }
+}
+
+
+// --- ACCIÓN DE CIERRE DE SESIÓN ---
+export async function manejarCierreSesion(): Promise<State> {
+    try {
+        const result = await cerrarSesion();
+        
+        if (!result.success) {
+            return {
+                success: false,
+                message: result.message
+            };
+        }
+
+        return {
+            success: true,
+            message: result.message
+        };
+        
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        return {
+            success: false,
+            message: 'Error inesperado al cerrar sesión.'
+        };
     }
 }

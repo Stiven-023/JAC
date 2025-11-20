@@ -2,8 +2,8 @@
 
 import MainFooter from '@/components/MainFooter';
 
-import { useActionState, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useActionState, useEffect, useState } from 'react';
+import { redirect, useSearchParams } from 'next/navigation';
 
 
 import { manejarRegistro, manejarInicioSesion, type State } from './action';
@@ -11,7 +11,7 @@ import { FaHome } from 'react-icons/fa';
 import Link from 'next/link';
 import { LoginForm } from '@/components/login/LoginForm';
 import { RegisterForm } from '@/components/login/RegisterForm';
-const initialState: State = { message: '' };
+const initialState: State = { success: false, message: '' };
 
 export default function LoginPage() {
 
@@ -23,6 +23,22 @@ export default function LoginPage() {
   // Se usa useFormState temporalmente
   const [loginState, loginDispatch] = useActionState(manejarInicioSesion, initialState);
   const [registerState, registerDispatch] = useActionState(manejarRegistro, initialState);
+
+
+  useEffect(() => {
+        if (loginState.success) {
+            redirect('/home');
+        }
+  }, [loginState]);
+
+  if (loginState.success) {
+    redirect('/home' );
+  }
+
+  if (registerState.success){
+    redirect('/login' );
+  }
+
 
   return (
     <div className='flex flex-col min-h-screen' style={{background:'red'}}>
