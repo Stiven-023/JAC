@@ -1,7 +1,6 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
-import { redirect } from 'next/navigation';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
@@ -20,13 +19,24 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 // --- REGISTRO DE USUARIO ---
 export async function registrarUsuario(formData: FormData) {
+
   let email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  const full_name = formData.get('full_name') as string;
-  let document_number = formData.get('document_number') as string;
-  const contact_info = formData.get('contact_info') as string;
-  const apartment_number = formData.get('apartment_number') as string;
+  const full_name = formData.get('name') as string;
+  let document_number = formData.get('id') as string;
+  const contact_info = formData.get('phone') as string;
+  const apartment_number = formData.get('apartment') as string;
 
+
+  console.log({
+    email,
+    password,
+    full_name,
+    document_number,
+    contact_info,
+    apartment_number
+  });
+  
   // [Código de Validación Omitido para Brevedad]
 
   // A. Validar el Correo
@@ -36,13 +46,15 @@ export async function registrarUsuario(formData: FormData) {
   }
 
   // B. Número de Documento contenga cc y se guarde en mayuscula
-  document_number = document_number.trim().toUpperCase();
+  document_number = document_number?.trim().toUpperCase();
   if (!document_number.startsWith('CC')) {
     document_number = 'CC' + document_number;
   }
 
   // C. Validar Contacto (mínimo 7, máximo 10 dígitos)
-  const contactDigits = contact_info.replace(/\D/g, ''); // Solo números
+  const contactDigits = contact_info; // Solo números
+  console.log(contactDigits);
+  
   if (contactDigits.length < 7 || contactDigits.length > 10) {
     return { success: false, message: 'El número de contacto debe tener entre 7 y 10 dígitos.' };
   }
@@ -126,7 +138,11 @@ export async function registrarUsuario(formData: FormData) {
   }
 
   // Éxito: Redirige al login.
-  return redirect('/login?message=Registro exitoso. Revisa tu correo electrónico para confirmar la cuenta.');
+  // return redirect('/login?message=Registro exitoso. Revisa tu correo electrónico para confirmar la cuenta.');
+  return {
+    success: true,
+    message: 'Usuario creado exitosamente'
+  }
 }
 
 
@@ -153,5 +169,29 @@ export async function iniciarSesion(formData: FormData) {
   }
 
   // 3. Redirigir al usuario al dashboard principal
-  return redirect('/home');
+  return  {
+      success : true
+  };
+}
+
+
+/**
+ * Cierra la sesión del usuario actual.
+ */
+export async function cerrarSesion() {
+  try {
+    const supabase = createRouteHandlerClient({ cookies });
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error al cerrar sesión:', error.message);
+      return { success: false, message: 'No se pudo cerrar la sesión. Intenta nuevamente.' };
+    }
+
+    return { success: true, message: 'Sesión cerrada exitosamente.' };
+  } catch (error) {
+    console.error('Error inesperado al cerrar sesión:', error);
+    return { success: false, message: 'Ocurrió un error inesperado al cerrar sesión.' };
+  }
 }
