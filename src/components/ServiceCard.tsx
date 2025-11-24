@@ -1,21 +1,26 @@
 import React from "react";
 
-export default function ServiceCard({ icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
+export default function ServiceCard({
+    icon,
+    title,
+    description,
+}: {
+    icon: React.ElementType;
+    title: string;
+    description: string;
+}) {
     return (
-        <div className="flex flex-col p-1 bg-[#D9D9D9] rounded-lg shadow-md lg:space-y-2 lg:w-60">
-            <div className="flex flex-col justify-between space-x-2 items-center lg:flex-row ">
-
-                {React.createElement(icon, { size: 50 })}
-                <h2 className="font-bold whitespace-pre-line ">{title}</h2>
-
+        <div className="flex h-full flex-col bg-[#D9D9D9] p-4 rounded-lg shadow-md space-y-3">
+            <div className="flex items-center space-x-3">
+                <div className="text-3xl text-gray-700">
+                    {React.createElement(icon, { size: 32 })}
+                </div>
+                <h2 className="font-bold">{title}</h2>
             </div>
-            <div>
-                <p className="flex flex-col p-1">{description}</p>
-            </div>
-            <div className="w-full">
-                <p className="flex justify-end" >Leer mas...</p>
+            <p>{description}</p>
+            <div className="flex justify-end">
+                <span className="hover:underline">Leer mas</span>
             </div>
         </div>
-
     );
 }
