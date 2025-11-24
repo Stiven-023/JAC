@@ -44,7 +44,7 @@ export default function HomeHeader() {
                     </div>
                     <div >
                         <h1>JAC</h1>
-                        <p className='text-xs'>Junta de accion comunal </p>
+                        <p className='text-xs'>Junta de acción comunal </p>
                     </div>
                 </div>
                 <div className='lg:hidden'>
