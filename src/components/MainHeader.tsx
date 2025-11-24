@@ -22,9 +22,9 @@ export default function MainHeader() {
                     <FaHome size={30} color="red" />
 
                 </div >
-                <h2 className=' lg:text-md xl:text-2xl m-0 leading-tight '>JAC</h2>
-                <p className=' lg:text-md xl:text-2xl m-0 leading-tight'>Junta de accion comunal </p>
-                <h3 className=' text-indigo-50 py-2 lg:text-md xl:text-2xl'>Bienvenido a la comunidad JAC!</h3>
+                <h2 className='text-white lg:text-md xl:text-2xl m-0 leading-tight '>JAC</h2>
+                <p className='text-white lg:text-md xl:text-2xl m-0 leading-tight'>Junta de acción comunal </p>
+                <h3 className=' text-indigo-50 py-2 lg:text-md xl:text-2xl'>¡Bienvenido a la comunidad JAC!</h3>
 
             </div>
         </header >

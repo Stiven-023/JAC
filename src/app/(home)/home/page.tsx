@@ -6,8 +6,8 @@ export default function Page() {
     return (
         <div className="flex flex-col text-center">
             <div className="mb-4">
-                <h1 className="font-bold">¡Bienvenido a la comunidad JAC!</h1>
-                <p>Junta de accion comunal de su conjunto residencial. <br></br>
+                <h1 className="font-bold text-2xl mb-2 -mt-6">¡Bienvenido a la comunidad JAC!</h1>
+                <p className="text-base text-gray-700">Junta de acción comunal de su conjunto residencial. <br></br>
                     Desde aqui puedes ver noticias, eventos y administrar servicios
                 </p>
             </div>
