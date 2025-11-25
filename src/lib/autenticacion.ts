@@ -36,7 +36,7 @@ export async function registrarUsuario(formData: FormData) {
     contact_info,
     apartment_number
   });
-  
+
   // [Código de Validación Omitido para Brevedad]
 
   // A. Validar el Correo
@@ -54,7 +54,7 @@ export async function registrarUsuario(formData: FormData) {
   // C. Validar Contacto (mínimo 7, máximo 10 dígitos)
   const contactDigits = contact_info; // Solo números
   console.log(contactDigits);
-  
+
   if (contactDigits.length < 7 || contactDigits.length > 10) {
     return { success: false, message: 'El número de contacto debe tener entre 7 y 10 dígitos.' };
   }
@@ -107,12 +107,13 @@ export async function registrarUsuario(formData: FormData) {
     const { error: dbError } = await supabaseAdmin
       .from('residents')
       .insert({
-        id: userId, // Vinculación con el usuario de Auth
+        id_residentes: userId, 
         full_name,
         document_number,
         contact_info,
         apartment_number,
-        is_admin: false, // Rol por defecto: Residente
+        is_admin: false,
+        estado: true,
       });
 
     if (dbError) {
@@ -169,8 +170,8 @@ export async function iniciarSesion(formData: FormData) {
   }
 
   // 3. Redirigir al usuario al dashboard principal
-  return  {
-      success : true
+  return {
+    success: true
   };
 }
 
