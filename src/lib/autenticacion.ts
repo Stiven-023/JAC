@@ -137,7 +137,7 @@ export async function registrarUsuario(formData: FormData) {
       };
     }
   }
-
+  //Creacion Base de datos
   // Éxito: Redirige al login.
   // return redirect('/login?message=Registro exitoso. Revisa tu correo electrónico para confirmar la cuenta.');
   return {
