@@ -21,6 +21,7 @@ import {
     Chip,
     Stack,
     InputAdornment,
+    CircularProgress,
 } from '@mui/material';
 import SearchIcon from "@mui/icons-material/Search"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
@@ -74,7 +75,7 @@ export const UserManagement: React.FC = () => {
     if (!isClient) {
         return (
             <>
-                <p>Cargando</p>
+                <CircularProgress/>
             </>
         )
     }
@@ -93,19 +94,8 @@ export const UserManagement: React.FC = () => {
     };
 
     return (
-        <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: '1400px', margin: '0 auto', backgroundColor: '#fafafa', minHeight: '100vh' }}>
-            <Typography
-                variant="h5"
-                sx={{
-                    fontWeight: 600,
-                    mb: 4,
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' },
-                    color: '#000'
-                }}
-            >
-                Gestión de usuarios
-            </Typography>
-
+        <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: '1400px', margin: '0 auto', backgroundColor: '#fafafa' }}>
+        
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
