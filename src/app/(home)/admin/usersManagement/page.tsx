@@ -1,3 +1,4 @@
+//conservar este archivo
 import { obtenerListaResidentesAdmin, ResidenteAdmin } from '@/lib/adminActions';
 import { UserManagement } from "@/components/UserManagement";
 
