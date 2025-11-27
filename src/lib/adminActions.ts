@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 
 export type ResidenteAdmin = {
-    id: string;
+    id_residentes: string;
     full_name: string;
     document_number: string;
     contact_info: string;
@@ -30,7 +30,7 @@ export async function obtenerListaResidentesAdmin(): Promise<ResidenteAdmin[]> {
     const { data: residentes, error } = await supabaseAdmin
         .from('residents')
         .select(`
-            id, 
+            id_residentes, 
             full_name, 
             document_number, 
             contact_info,
@@ -50,7 +50,7 @@ export async function obtenerListaResidentesAdmin(): Promise<ResidenteAdmin[]> {
 }
 
 export async function actualizarResidenteAdmin(formData: FormData) {
-    const id_residente = formData.get('id_residente') as string;
+    const id_residentes = formData.get('id_residentes') as string;
     const is_admin_nuevo = formData.get('is_admin') === 'true';
     const full_name_nuevo = formData.get('full_name') as string;
     const estado_nuevo = formData.get('estado') === 'true';
@@ -62,7 +62,7 @@ export async function actualizarResidenteAdmin(formData: FormData) {
             is_admin: is_admin_nuevo,
             estado: estado_nuevo
         })
-        .eq('id', id_residente);
+        .eq('id_residentes', id_residentes);
 
     if (error) {
         console.error('Error al actualizar residente:', error.message);
@@ -75,9 +75,9 @@ export async function actualizarResidenteAdmin(formData: FormData) {
     return { success: true, message: 'Residente actualizado exitosamente.' };
 }
 
-export async function eliminarResidenteAdmin(id_residente: string) {
+export async function eliminarResidenteAdmin(id_residentes: string) {
 
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id_residente);
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id_residentes);
 
     if (authError) {
         console.error('Error al eliminar usuario de Auth:', authError.message);
@@ -88,10 +88,10 @@ export async function eliminarResidenteAdmin(id_residente: string) {
     const { error: dbError } = await supabaseAdmin
         .from('residents')
         .delete()
-        .eq('id', id_residente);
+        .eq('id_residentes', id_residentes);
 
     if (dbError) {
-        console.error('ERROR CRÍTICO: Fallo al eliminar el perfil de la BD. ID:', id_residente);
+        console.error('ERROR CRÍTICO: Fallo al eliminar el perfil de la BD. ID:', id_residentes);
         return { success: false, message: 'Error de consistencia en la BD. Perfil restante.' };
     }
 
