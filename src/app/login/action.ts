@@ -4,7 +4,7 @@ import {
     registrarUsuario, 
     iniciarSesion, 
     cerrarSesion
-} from '@/lib/autenticacion'; // Importamos las funciones de backend seguro
+} from '@/lib/autenticacion'; 
 
 // Definimos el tipo de estado
 export type State = {
