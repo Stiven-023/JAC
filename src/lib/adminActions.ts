@@ -76,26 +76,35 @@ export async function actualizarResidenteAdmin(formData: FormData) {
 }
 
 export async function eliminarResidenteAdmin(id_residentes: string) {
+    try {
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id_residentes);
 
-    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id_residentes);
+        if (authError) {
+            // si no esta el usuario de la tabla Auth continua 
+            if (authError.message === 'User not found') {
+                console.warn('[SUPABASE AUTH] Usuario no encontrado. Procediendo a eliminar el registro de la tabla residents.');
+            } else {
+                // Error de permisos 
+                return { success: false, message: 'Fallo al eliminar el usuario de autenticación.' };
+            }
+        }
 
-    if (authError) {
-        console.error('Error al eliminar usuario de Auth:', authError.message);
-        return { success: false, message: 'Fallo al eliminar el usuario de autenticación.' };
+        // Elimina de la tabla de residents
+        const { error: dbError } = await supabaseAdmin
+            .from('residents')
+            .delete()
+            .eq('id_residentes', id_residentes);
+
+        if (dbError) {
+            console.error('ERROR CRÍTICO: Fallo al eliminar el perfil de la BD. ID:', id_residentes);
+            return { success: false, message: 'Error de consistencia en la BD. Perfil restante.' };
+        }
+        
+        revalidatePath('/admin/usersManagement');
+        return { success: true, message: 'Usuario eliminado completamente.' };
+
+    } catch (e) {
+        console.error("ERROR CRÍTICO INESPERADO en eliminarResidenteAdmin:", e);
+        return { success: false, message: 'Error interno en el servidor. Intente de nuevo.' };
     }
-
-    
-    const { error: dbError } = await supabaseAdmin
-        .from('residents')
-        .delete()
-        .eq('id_residentes', id_residentes);
-
-    if (dbError) {
-        console.error('ERROR CRÍTICO: Fallo al eliminar el perfil de la BD. ID:', id_residentes);
-        return { success: false, message: 'Error de consistencia en la BD. Perfil restante.' };
-    }
-
-    revalidatePath('/admin/usersManagement');
-
-    return { success: true, message: 'Usuario eliminado completamente.' };
 }

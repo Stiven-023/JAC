@@ -37,21 +37,19 @@ export async function registrarUsuario(formData: FormData) {
     apartment_number
   });
 
-  // [Código de Validación Omitido para Brevedad]
-
-  // A. Validar el Correo
+  //Validar el Correo
   email = email.trim().toLowerCase();
   if (!email.includes('@')) {
     return { success: false, message: 'El formato del correo electrónico es inválido.' };
   }
 
-  // B. Número de Documento contenga cc y se guarde en mayuscula
+  //Número de Documento contenga cc y se guarde en mayuscula
   document_number = document_number?.trim().toUpperCase();
   if (!document_number.startsWith('CC')) {
     document_number = 'CC' + document_number;
   }
 
-  // C. Validar Contacto (mínimo 7, máximo 10 dígitos)
+  //  Validar Contacto (mínimo 7, máximo 10 dígitos)
   const contactDigits = contact_info; // Solo números
   console.log(contactDigits);
 
@@ -59,7 +57,7 @@ export async function registrarUsuario(formData: FormData) {
     return { success: false, message: 'El número de contacto debe tener entre 7 y 10 dígitos.' };
   }
 
-  // D. Validar Contraseña
+  // Validar Contraseña
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}[\]:;"'<>,.?/\\|]).{8,}$/;
   if (!passwordRegex.test(password)) {
     return {
@@ -68,7 +66,7 @@ export async function registrarUsuario(formData: FormData) {
     };
   }
 
-  // E. Busca si ya existe un registro con ese número de documento
+  // Busca si ya existe un registro con ese número de documento
   const { data: residentExists, error: uniquenessError } = await supabaseAdmin
     .from('residents')
     .select('document_number')
@@ -100,7 +98,7 @@ export async function registrarUsuario(formData: FormData) {
     return { success: false, message: authError.message };
   }
 
-  // --- 2. REGISTRO DE RESIDENTE (PERFIL) ---
+  // --- 2. REGISTRO DE RESIDENTE ---
   const userId = authData.user?.id;
 
   if (userId) {
@@ -119,7 +117,7 @@ export async function registrarUsuario(formData: FormData) {
     if (dbError) {
       console.error('Error al insertar en tabla residents:', dbError.message);
 
-      // 3. ¡ROLLBACK! Si falla la inserción del perfil, eliminamos el usuario de Auth.
+      // 3. ¡ROLLBACK! Si falla la inserción del perfil, se elimina el usuario de Auth.
       const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
       if (deleteError) {
@@ -129,17 +127,12 @@ export async function registrarUsuario(formData: FormData) {
           message: 'Error de consistencia. Contacta al administrador.'
         };
       }
-
-      // Mensaje amigable al usuario
       return {
         success: false,
         message: 'Ocurrió algo inesperado. Por favor, intenta nuevamente.'
       };
     }
   }
-  //Creacion Base de datos
-  // Éxito: Redirige al login.
-  // return redirect('/login?message=Registro exitoso. Revisa tu correo electrónico para confirmar la cuenta.');
   return {
     success: true,
     message: 'Usuario creado exitosamente'
@@ -147,10 +140,8 @@ export async function registrarUsuario(formData: FormData) {
 }
 
 
-// --- FUNCIÓN DE INICIO DE SESIÓN (Sin cambios)
-/**
- * Inicia sesión de un usuario existente.
- */
+
+// Iniciar Sesión
 export async function iniciarSesion(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
@@ -175,10 +166,7 @@ export async function iniciarSesion(formData: FormData) {
   };
 }
 
-
-/**
- * Cierra la sesión del usuario actual.
- */
+//Cierra la sesión del usuario actual.
 export async function cerrarSesion() {
   try {
     const supabase = createRouteHandlerClient({ cookies });
