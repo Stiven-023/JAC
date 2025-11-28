@@ -31,7 +31,7 @@ import { ResidenteAdmin, eliminarResidenteAdmin } from '@/lib/adminActions';
 
 
 interface UserManagementProps {
-    initialResidents: ResidenteAdmin[];
+    initialResidents: ResidenteAdmin[] | null | undefined;
     initialError: string | null;
 }
 
@@ -41,7 +41,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
     const [isClient, setIsClient] = React.useState<boolean>(false);
 
 
-    const [residents, setResidents] = React.useState<ResidenteAdmin[]>(initialResidents);
+    const [residents, setResidents] = React.useState<ResidenteAdmin[]>(initialResidents ?? []);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string | null>(initialError);
 
@@ -58,25 +58,25 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
         if (confirm(`¿Estás seguro de que quieres eliminar a ${userName}? Esta acción es irreversible y eliminará su cuenta de Auth.`)) {
             setLoading(true);
 
-            
+
             console.log(`[CLIENTE] Intentando eliminar usuario: ${userName} (ID: ${userId})`);
 
             try {
                 const result = await eliminarResidenteAdmin(userId);
 
-                
+
                 console.log("[CLIENTE] Respuesta de Server Action:", result);
 
                 if (result.success) {
                     console.log(`[CLIENTE] Eliminación exitosa. Filtrando estado local.`);
-                    
+
                     setResidents(prev => prev.filter(r => r.id_residentes !== userId));
                 } else {
                     console.error("[CLIENTE] Error reportado por Server Action:", result.message);
                     setError(result.message || "Error desconocido al eliminar el usuario.");
                 }
             } catch (_err) {
-                
+
                 console.error("[CLIENTE] Fallo crítico en la ejecución de la Server Action:", _err);
                 setError("Fallo crítico en la conexión con el servidor.");
             } finally {
@@ -113,12 +113,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
     if (!isClient) {
         return (
             <>
-                <CircularProgress/>
+                <CircularProgress />
             </>
         )
     }
 
-    if (error && initialResidents.length === 0) {
+    if (error && (initialResidents?.length === 0 || !initialResidents)) {
         return (
             <Box sx={{ p: 4 }}>
                 <Alert severity="error">
@@ -130,7 +130,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
 
     return (
         <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: '1400px', margin: '0 auto', backgroundColor: '#fafafa' }}>
-        
+
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
