@@ -4,13 +4,16 @@ import { UserManagement } from "@/components/UserManagement";
 import { ResidenteAdmin } from "@/lib/adminActions";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useState } from "react";
+import NoticiasTable from "./admin/NoticiasTable";
+import { Noticia } from "@/lib/supabase";
 
 interface AdminClientLayoutProps {
     initialResidents: ResidenteAdmin[];
+    initialNoticias?: Noticia[]
     initialError: string | null;
 }
 
-export default function AdminClientLayout({ initialResidents, initialError }: AdminClientLayoutProps) {
+export default function AdminClientLayout({ initialResidents, initialError, initialNoticias }: AdminClientLayoutProps) {
 
     const [tabIndex, setTabIndex] = useState(0);
 
@@ -46,7 +49,7 @@ export default function AdminClientLayout({ initialResidents, initialError }: Ad
                                     initialError={initialError}
                                 />
                             )}
-                            {tabIndex === 1 && <Typography>Gestion de Noticias</Typography>}
+                            {tabIndex === 1 && <NoticiasTable initialNoticias={initialNoticias ?? []}/>}
                             {tabIndex === 2 && <Typography>Gestion de eventos</Typography>}
                             {tabIndex === 3 && <Typography>Gestion de servicios</Typography>}
                         </Box>
