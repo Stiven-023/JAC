@@ -1,16 +1,18 @@
 'use client';
 
-import { UserManagement } from "@/components/UserManagement";
-import { ServiceManagement } from "@/components/ServiceManagement"; // Asegúrate de que este import exista
-import { ResidenteAdmin, ServicioDisponible, Solicitud } from "@/lib/adminActions"; // Importamos los nuevos tipos
+import { UserManagement } from "@/components/admin/UserManagement";
+import { ServiceManagement } from "@/components/admin/ServiceManagement";
+import { ResidenteAdmin, ServicioDisponible, Solicitud } from "@/lib/adminActions";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useState } from "react";
+import NoticiasTable from "./admin/NoticiasTable";
+import { Noticia } from "@/lib/supabase";
 
-// 1. ACTUALIZACIÓN DE LA INTERFAZ DE PROPS
+// --- 1. INTERFAZ DE PROPS ÚNICA Y COMPLETA ---
 interface AdminClientLayoutProps {
-    // PROPS DE USUARIOS (Nombres originales respetados)
+    // PROPS DE USUARIOS
     initialResidents: ResidenteAdmin[];
-    initialError: string | null;       // Este será el error de la carga de Residentes
+    initialError: string | null;      // Error de la carga de Residentes/Noticias
 
     // PROPS DE SERVICIOS
     initialServices: ServicioDisponible[];
@@ -19,17 +21,22 @@ interface AdminClientLayoutProps {
     // PROPS DE SOLICITUDES
     initialRequests: Solicitud[];
     requestError: string | null;
+    
+    // PROPS DE NOTICIAS (Añadida, ya que se usa)
+    initialNoticias: Noticia[];
 }
+// --------------------------------------------------
 
 export default function AdminClientLayout({ 
-    // Desestructuración de todas las props
+    // Desestructuración de TODAS las props definidas en la interfaz
     initialResidents, 
-    initialError,    // Error de Residentes
+    initialError, 
     initialServices, 
     serviceError,
     initialRequests, 
-    requestError 
-}: AdminClientLayoutProps) {
+    requestError,
+    initialNoticias // Propiedad de Noticias desestructurada
+}: AdminClientLayoutProps) { // Aplicación del tipo al componente
 
     const [tabIndex, setTabIndex] = useState(0);
 
@@ -51,10 +58,10 @@ export default function AdminClientLayout({
                                 variant="scrollable"
                                 scrollButtons="auto"
                             >
-                                <Tab label={"Usuarios"} />
-                                <Tab label={"Noticias"} />
-                                <Tab label={"Eventos"} />
-                                <Tab label={"Servicios"} />
+                                <Tab label={"Usuarios"} />        {/* tabIndex = 0 */}
+                                <Tab label={"Noticias"} />        {/* tabIndex = 1 */}
+                                <Tab label={"Eventos"} />         {/* tabIndex = 2 */}
+                                <Tab label={"Servicios"} />       {/* tabIndex = 3 */}
                             </Tabs>
                         </Box>
                         <Box sx={{ padding: 2 }} style={{ maxWidth: '-webkit-fill-available' }}>
@@ -65,8 +72,11 @@ export default function AdminClientLayout({
                                     initialError={initialError} // Error de Residentes
                                 />
                             )}
+                            
                             {/* Pestaña 1: Gestión de Noticias */}
-                            {tabIndex === 1 && <Typography>Gestion de Noticias</Typography>}
+                            {tabIndex === 1 && (
+                                <NoticiasTable initialNoticias={initialNoticias} />
+                            )}
                             
                             {/* Pestaña 2: Gestión de Eventos */}
                             {tabIndex === 2 && <Typography>Gestion de eventos</Typography>}
@@ -75,9 +85,9 @@ export default function AdminClientLayout({
                             {tabIndex === 3 && (
                                 <ServiceManagement
                                     initialServices={initialServices}
-                                    initialServiceError={serviceError}
+                                    initialServiceError={serviceError} // Nota: Renombrar a 'initialServiceError' si el componente ServiceManagement lo requiere
                                     initialRequests={initialRequests}
-                                    initialRequestError={requestError}
+                                    initialRequestError={requestError} // Nota: Renombrar a 'initialRequestError' si el componente ServiceManagement lo requiere
                                 />
                             )}
                         </Box>
