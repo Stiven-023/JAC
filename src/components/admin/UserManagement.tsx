@@ -10,7 +10,7 @@ import { UserTable } from './userManagementComponents/UserTable';
 import { UserCardList } from './userManagementComponents/UserCardList';
 import { UserEditDialog } from './userManagementComponents/UserEditDialog';
 
-
+//
 interface UserEditFormData { full_name: string; contact_info: string; is_admin: boolean; estado: boolean; }
 interface UserManagementProps { initialResidents: ResidenteAdmin[] | null | undefined; initialError: string | null; }
 
