@@ -11,7 +11,6 @@ interface ServiceEditFormData {
     titulo_servicio: string;
     descripcion_short: string;
     descripcion_full: string | null;
-    icono_nombre: string | null;
     is_activo: boolean;
 }
 
@@ -75,15 +74,6 @@ export const ServiceEditDialog: React.FC<ServiceEditDialogProps> = ({
                         multiline
                         rows={4}
                         disabled={isSaving}
-                    />
-                    
-                    <TextField
-                        label="Icono (Nombre del icono de Material UI - Opcional)"
-                        value={formData.icono_nombre || ''}
-                        onChange={(e) => onFormChange({ icono_nombre: e.target.value })}
-                        fullWidth
-                        disabled={isSaving}
-                        helperText="Ej: 'LocalLaundry' o 'FitnessCenter'"
                     />
 
                     <FormControlLabel

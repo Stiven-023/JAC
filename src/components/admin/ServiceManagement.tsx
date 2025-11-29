@@ -1,18 +1,15 @@
-// components/ServiceManagement.tsx
 'use client'
 
 import React from 'react';
-import { Box, Typography, Alert, Paper, Tabs, Tab, useTheme, useMediaQuery, CircularProgress, Fab } from '@mui/material';
+import { Box, Typography, Alert, Paper, Tabs, Tab, useTheme, useMediaQuery, CircularProgress, Button} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
-// 🛑 Importaciones de tus Server Actions (Asegúrate de que las rutas sean correctas)
-// He renombrado ServicioDisponible a ServiceAdmin para mantener la coherencia con UserAdmin
-import { 
-    ServicioDisponible as ServiceAdmin, 
+import {
+    ServicioDisponible as ServiceAdmin,
     Solicitud,
-    crearServicioDisponible, 
-    actualizarServicioDisponible, 
-    eliminarServicioDisponible 
+    crearServicioDisponible,
+    actualizarServicioDisponible,
+    eliminarServicioDisponible
 } from '@/lib/adminActions';
 
 import { ServiceTable } from './serviceManagementComponents/ServiceTable';
@@ -23,19 +20,17 @@ interface ServiceEditFormData {
     titulo_servicio: string;
     descripcion_short: string;
     descripcion_full: string | null;
-    icono_nombre: string | null;
     is_activo: boolean;
 }
 const initialServiceFormData: ServiceEditFormData = {
     titulo_servicio: '',
     descripcion_short: '',
     descripcion_full: '',
-    icono_nombre: '',
     is_activo: true,
 };
 const getStatusColor = (isActive: boolean): 'success' | 'error' => isActive ? 'success' : 'error';
 const getStatusString = (isActive: boolean): string => isActive ? 'Activo' : 'Inactivo';
-
+//
 const RequestListTab: React.FC<{ requests: Solicitud[], error: string | null }> = ({ requests, error }) => {
     return (
         <Box sx={{ p: 3 }}>
@@ -44,24 +39,22 @@ const RequestListTab: React.FC<{ requests: Solicitud[], error: string | null }> 
             {requests.length === 0 && !error ? (
                 <Alert severity="info">No hay solicitudes nuevas en el sistema.</Alert>
             ) : (
-            
+
                 <Typography>Mostrando {requests.length} solicitudes.</Typography>
             )}
         </Box>
     );
 };
 
-// --- COMPONENTE PADRE ---
-
 interface ServiceManagementProps {
     initialServices: ServiceAdmin[] | null | undefined;
     initialServiceError: string | null;
-    initialRequests: Solicitud[] | null | undefined; 
-    initialRequestError: string | null; 
+    initialRequests: Solicitud[] | null | undefined;
+    initialRequestError: string | null;
 }
 
-export const ServiceManagement: React.FC<ServiceManagementProps> = ({ 
-    initialServices, 
+export const ServiceManagement: React.FC<ServiceManagementProps> = ({
+    initialServices,
     initialServiceError,
     initialRequests,
     initialRequestError
@@ -75,7 +68,6 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
     const [isSaving, setIsSaving] = React.useState<boolean>(false);
     const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
-
     // Estado del Diálogo de Edición/Creación
     const [openEditDialog, setOpenEditDialog] = React.useState<boolean>(false);
     const [currentEditingService, setCurrentEditingService] = React.useState<ServiceAdmin | null>(null);
@@ -85,17 +77,15 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
     const [internalTabIndex, setInternalTabIndex] = React.useState(0);
     const handleInternalTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setInternalTabIndex(newValue);
-        setError(null); // Limpiar errores al cambiar de pestaña
+        setError(null);
         setSuccessMessage(null);
     };
 
-    // --- MANEJO DEL DIÁLOGO Y FORMULARIO (CRUD) ---
-
     const handleOpenCreateDialog = () => {
-        setCurrentEditingService(null); // Indica que es una creación
+        setCurrentEditingService(null);
         setServiceFormData(initialServiceFormData);
         setOpenEditDialog(true);
-        setError(null); 
+        setError(null);
     };
 
     const handleOpenEditDialog = (service: ServiceAdmin) => {
@@ -104,7 +94,6 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             titulo_servicio: service.titulo_servicio,
             descripcion_short: service.descripcion_short,
             descripcion_full: service.descripcion_full,
-            icono_nombre: service.icono_nombre,
             is_activo: service.is_activo,
         });
         setOpenEditDialog(true);
@@ -127,7 +116,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
     const handleSaveService = async () => {
         if (isSaving) return;
 
-        // Validación básica
+        // Validación
         if (!serviceFormData.titulo_servicio || !serviceFormData.descripcion_short) {
             setError("El título y la descripción corta no pueden estar vacíos.");
             return;
@@ -142,9 +131,8 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             formData.append('titulo_servicio', serviceFormData.titulo_servicio);
             formData.append('descripcion_short', serviceFormData.descripcion_short);
             formData.append('descripcion_full', serviceFormData.descripcion_full || '');
-            formData.append('icono_nombre', serviceFormData.icono_nombre || '');
             formData.append('is_activo', String(serviceFormData.is_activo));
-            
+
             let result: { success: boolean, message?: string };
 
             if (currentEditingService) {
@@ -157,13 +145,8 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             }
 
             if (result.success) {
-                // Nota: La actualización de la lista debe recargar los datos del servidor (revalidatePath)
-                // Para una UX rápida, se recomienda solo actualizar el estado local aquí, pero en Next.js
-                // confiamos en revalidatePath, por lo que cerramos y mostramos mensaje.
                 setSuccessMessage(result.message || (currentEditingService ? "Servicio actualizado." : "Servicio creado."));
                 handleCloseEditDialog();
-                // Una recarga simple de la página o un hook de refresh de datos sería ideal aquí. 
-                // Por simplicidad, asumimos que Next.js recarga la ruta después de la Server Action.
             } else {
                 setError(result.message || "Error desconocido al guardar el servicio.");
             }
@@ -208,20 +191,27 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         <Box sx={{ p: 3, position: 'relative' }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>Operación fallida: {error}</Alert>}
             {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
-            
-            {/* Botón flotante de crear */}
-            <Fab 
-                color="primary" 
-                aria-label="add" 
-                sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}
-                onClick={handleOpenCreateDialog}
-                disabled={loading || isSaving}
-            >
-                <AddIcon />
-            </Fab>
 
-            <Typography variant="h6" mb={3} sx={{ pt: 1 }}>Servicios Disponibles ({services.length})</Typography>
-            
+            {/* BARRA DE TÍTULO Y BOTÓN DE ACCIÓN (NUEVO BLOQUE) */}
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+
+                {/* TÍTULO DE LA LISTA */}
+                <Typography variant="h6">Servicios Disponibles ({services.length})</Typography>
+
+                {/* BOTÓN ESTÁNDAR DE CREACIÓN */}
+                <Button
+                    variant="contained"
+                    color={'error'}
+                    onClick={handleOpenCreateDialog} // Misma lógica
+                    disabled={loading || isSaving} // Misma lógica
+                    startIcon={<AddIcon />} // Icono
+                    sx={{ textTransform: 'none' }}
+                >
+                    Crear Nuevo Servicio
+                </Button>
+            </Box>
+
+            {/* LISTA DE RESULTADOS (SIN CAMBIOS) */}
             {services.length === 0 ? (
                 <Alert severity="info">No hay servicios maestros registrados.</Alert>
             ) : isMobile ? (
@@ -258,11 +248,11 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
             {/* Contenido de Pestañas Internas */}
             {internalTabIndex === 0 && serviceListTabContent}
-            
+
             {internalTabIndex === 1 && (
-                <RequestListTab 
-                    requests={initialRequests ?? []} // Usamos los datos iniciales
-                    error={initialRequestError} 
+                <RequestListTab
+                    requests={initialRequests ?? []}
+                    error={initialRequestError}
                 />
             )}
 

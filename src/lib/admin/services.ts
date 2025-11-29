@@ -10,7 +10,6 @@ export type ServicioDisponible = {
     titulo_servicio: string;
     descripcion_short: string;
     descripcion_full: string | null;
-    icono_nombre: string | null;
     is_activo: boolean;
 };
 
@@ -24,7 +23,6 @@ export async function obtenerListaServiciosAdmin(): Promise<ServicioDisponible[]
             titulo_servicio,
             descripcion_short,
             descripcion_full,
-            icono_nombre,
             is_activo
         `)
         .order('titulo_servicio', { ascending: true });
@@ -41,7 +39,6 @@ export async function crearServicioDisponible(formData: FormData) {
     const titulo_servicio = formData.get('titulo_servicio') as string;
     const descripcion_short = formData.get('descripcion_short') as string;
     const descripcion_full = formData.get('descripcion_full') as string | null;
-    const icono_nombre = formData.get('icono_nombre') as string | null;
     const is_activo = formData.get('is_activo') === 'true'; 
 
     if (!titulo_servicio || !descripcion_short) {
@@ -55,7 +52,6 @@ export async function crearServicioDisponible(formData: FormData) {
                 titulo_servicio,
                 descripcion_short,
                 descripcion_full: descripcion_full || null,
-                icono_nombre: icono_nombre || null,
                 is_activo,
             });
 
@@ -81,7 +77,6 @@ export async function actualizarServicioDisponible(formData: FormData) {
     const titulo_servicio = formData.get('titulo_servicio') as string;
     const descripcion_short = formData.get('descripcion_short') as string;
     const descripcion_full = formData.get('descripcion_full') as string | null;
-    const icono_nombre = formData.get('icono_nombre') as string | null;
     const is_activo = formData.get('is_activo') === 'true'; 
 
     if (!id_servicio || !titulo_servicio || !descripcion_short) {
@@ -95,7 +90,6 @@ export async function actualizarServicioDisponible(formData: FormData) {
                 titulo_servicio,
                 descripcion_short,
                 descripcion_full: descripcion_full || null,
-                icono_nombre: icono_nombre || null,
                 is_activo,
             })
             .eq('id_servicio', parseInt(id_servicio));
