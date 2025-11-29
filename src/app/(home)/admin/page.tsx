@@ -1,47 +1,22 @@
-'use client';
+import { obtenerListaResidentesAdmin, ResidenteAdmin } from '@/lib/adminActions';
+import AdminClientLayout from "@/components/AdminClientLayout";
 
-import { UserManagement } from "@/components/UserManagement";
-import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { useState } from "react";
+export default async function AdminPage() {
+    
+    let initialResidents: ResidenteAdmin[] = [];
+    let initialError: string | null = null;
 
-export default function AdminPage() {
+    try {
+        initialResidents = await obtenerListaResidentesAdmin();
+    } catch (error) {
+        console.error("Fallo al cargar residentes en AdminPage:", error);
+        initialError = error instanceof Error ? error.message : "Error desconocido al cargar usuarios.";
+    }
 
-    const [tabIndex, setTabIndex] = useState(0);
-
-  return (
-    <>
-      <Grid margin={1} overflow={"hidden"} paddingX={4} paddingTop={5}>
-      <Grid>
-        <Typography variant="h4" fontWeight="fontWeightBold">
-          {"Administrador"}
-        </Typography>
-      </Grid>
-      <Grid>
-        <Box sx={{ width: "100%" }}>
-          <Box paddingTop={3} sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={tabIndex}
-              onChange={(e, newValue) => setTabIndex(newValue)}
-              aria-label="user management tabs"
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              <Tab label={"Usuarios"} />
-              <Tab label={"Noticias"}  />
-              <Tab label={"Eventos"} />
-              <Tab label={"Servicios"}  />
-            </Tabs>
-          </Box>
-          <Box sx={{ padding: 2 }} style={{ maxWidth: '-webkit-fill-available' }}>
-              {tabIndex === 0 && <UserManagement/>}
-              {tabIndex === 1 && <Typography>Gestion de Noticias</Typography>}
-              {tabIndex === 2 && <Typography>Gestion de eventos</Typography>}
-              {tabIndex === 3 && <Typography>Gestion de servicios</Typography>}
-          </Box>
-          </Box>
-      </Grid>
-    </Grid>
-
-    </>
-  );
+    return (
+        <AdminClientLayout
+            initialResidents={initialResidents}
+            initialError={initialError}
+        />
+    );
 }

@@ -21,81 +21,116 @@ import {
     Chip,
     Stack,
     InputAdornment,
+    Alert,
     CircularProgress,
 } from '@mui/material';
-import SearchIcon from "@mui/icons-material/Search"
-import MoreVertIcon from "@mui/icons-material/MoreVert"
+import SearchIcon from "@mui/icons-material/Search";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { ResidenteAdmin, eliminarResidenteAdmin } from '@/lib/adminActions';
 
-// Interfaz para el tipo de usuario
-interface User {
-    id: number;
-    nombreCompleto: string;
-    correo: string;
-    rol: string;
-    estado: string;
+
+interface UserManagementProps {
+    initialResidents: ResidenteAdmin[] | null | undefined;
+    initialError: string | null;
 }
 
-export const UserManagement: React.FC = () => {
+export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents, initialError }) => {
     const muiTheme = useTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'), { noSsr: true });
     const [isClient, setIsClient] = React.useState<boolean>(false);
 
-    React.useEffect(() => {
-        setIsClient(true);
-    }, []);
+
+    const [residents, setResidents] = React.useState<ResidenteAdmin[]>(initialResidents ?? []);
+    const [loading, setLoading] = React.useState<boolean>(false);
+    const [error, setError] = React.useState<string | null>(initialError);
+
 
     const [searchName, setSearchName] = React.useState<string>('');
     const [filterRole, setFilterRole] = React.useState<string>('');
     const [filterStatus, setFilterStatus] = React.useState<string>('');
 
-    const [users] = React.useState<User[]>([
-        {
-            id: 1,
-            nombreCompleto: 'Ana Gomez',
-            correo: 'ana616@gmail.com',
-            rol: 'Residente',
-            estado: 'Activo'
-        },
-        {
-            id: 2,
-            nombreCompleto: 'Carlos Martínez',
-            correo: 'carlos.m@gmail.com',
-            rol: 'Admin',
-            estado: 'Activo'
-        },
-        {
-            id: 3,
-            nombreCompleto: 'María López',
-            correo: 'maria.lopez@gmail.com',
-            rol: 'Residente',
-            estado: 'Inactivo'
+    React.useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const handleDelete = async (userId: string, userName: string) => {
+        if (confirm(`¿Estás seguro de que quieres eliminar a ${userName}? Esta acción es irreversible y eliminará su cuenta de Auth.`)) {
+            setLoading(true);
+
+
+            console.log(`[CLIENTE] Intentando eliminar usuario: ${userName} (ID: ${userId})`);
+
+            try {
+                const result = await eliminarResidenteAdmin(userId);
+
+
+                console.log("[CLIENTE] Respuesta de Server Action:", result);
+
+                if (result.success) {
+                    console.log(`[CLIENTE] Eliminación exitosa. Filtrando estado local.`);
+
+                    setResidents(prev => prev.filter(r => r.id_residentes !== userId));
+                } else {
+                    console.error("[CLIENTE] Error reportado por Server Action:", result.message);
+                    setError(result.message || "Error desconocido al eliminar el usuario.");
+                }
+            } catch (_err) {
+
+                console.error("[CLIENTE] Fallo crítico en la ejecución de la Server Action:", _err);
+                setError("Fallo crítico en la conexión con el servidor.");
+            } finally {
+                setLoading(false);
+            }
         }
-    ]);
+    };
+
+
+    const filteredUsers = residents.filter((user: ResidenteAdmin) => {
+
+        const userRole = user.is_admin ? 'Administrador' : 'Residente';
+        const userStatus = user.estado ? 'Activo' : 'Inactivo';
+
+        const matchesName = user.full_name.toLowerCase().includes(searchName.toLowerCase());
+        const matchesRole = !filterRole || userRole === filterRole;
+        const matchesStatus = !filterStatus || userStatus === filterStatus;
+
+        return matchesName && matchesRole && matchesStatus;
+    });
+
+    const roles: string[] = ['Administrador', 'Residente'];
+    const estados: string[] = ['Activo', 'Inactivo'];
+
+    const getStatusColor = (estado: boolean): 'success' | 'default' => {
+        return estado ? 'success' : 'default';
+    };
+
+    const getRoleString = (isAdmin: boolean): string => {
+        return isAdmin ? 'Administrador' : 'Residente';
+    }
+
 
     if (!isClient) {
         return (
             <>
-                <CircularProgress/>
+                <CircularProgress />
             </>
         )
     }
-    const filteredUsers = users.filter((user: User) => {
-        const matchesName = user.nombreCompleto.toLowerCase().includes(searchName.toLowerCase());
-        const matchesRole = !filterRole || user.rol === filterRole;
-        const matchesStatus = !filterStatus || user.estado === filterStatus;
-        return matchesName && matchesRole && matchesStatus;
-    });
 
-    const roles: string[] = ['Administrador', 'Residente', 'Invitado'];
-    const estados: string[] = ['Activo', 'Inactivo'];
-
-    const getStatusColor = (status: string): 'success' | 'default' => {
-        return status === 'Activo' ? 'success' : 'default';
-    };
+    if (error && (initialResidents?.length === 0 || !initialResidents)) {
+        return (
+            <Box sx={{ p: 4 }}>
+                <Alert severity="error">
+                    Error al cargar los usuarios: {error}
+                </Alert>
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: '1400px', margin: '0 auto', backgroundColor: '#fafafa' }}>
-        
+
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
@@ -133,7 +168,7 @@ export const UserManagement: React.FC = () => {
                         }
                     }}
                 >
-                    <MenuItem value="">Filtrar por rol</MenuItem>
+                    <MenuItem value="">Todos los roles</MenuItem>
                     {roles.map((role: string) => (
                         <MenuItem key={role} value={role}>{role}</MenuItem>
                     ))}
@@ -151,14 +186,23 @@ export const UserManagement: React.FC = () => {
                         }
                     }}
                 >
-                    <MenuItem value="">Filtrar por estado</MenuItem>
+                    <MenuItem value="">Todos los estados</MenuItem>
                     {estados.map((estado: string) => (
                         <MenuItem key={estado} value={estado}>{estado}</MenuItem>
                     ))}
                 </TextField>
             </Stack>
 
-            {!isMobile ? (
+            {/* Si no hay usuarios */}
+            {filteredUsers.length === 0 && (
+                <Alert severity="info">
+                    No se encontraron usuarios que coincidan con los filtros.
+                </Alert>
+            )}
+
+
+            {!isMobile && filteredUsers.length > 0 ? (
+
                 <TableContainer
                     component={Paper}
                     sx={{
@@ -169,45 +213,43 @@ export const UserManagement: React.FC = () => {
                     <Table>
                         <TableHead>
                             <TableRow sx={{ backgroundColor: '#fafafa' }}>
-                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>
-                                    Nombre completo
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>
-                                    Correo electrónico
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>
-                                    Rol
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>
-                                    Estado
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>
-                                    Acciones
-                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>Nombre completo</TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>Correo electrónico</TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>Rol</TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>Estado</TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#000' }}>Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {filteredUsers.map((user: User) => (
+                            {filteredUsers.map((user: ResidenteAdmin) => (
                                 <TableRow
-                                    key={user.id}
+                                    key={user.id_residentes}
                                     sx={{
                                         '&:hover': { backgroundColor: '#fafafa' },
                                         '&:last-child td': { border: 0 }
                                     }}
                                 >
-                                    <TableCell>{user.nombreCompleto}</TableCell>
-                                    <TableCell>{user.correo}</TableCell>
-                                    <TableCell>{user.rol}</TableCell>
+                                    {/* Mapeo de datos */}
+                                    <TableCell>{user.full_name}</TableCell>
+                                    <TableCell>{user.contact_info}</TableCell>
+                                    <TableCell>{getRoleString(user.is_admin)}</TableCell>
                                     <TableCell>
                                         <Chip
-                                            label={user.estado}
+                                            label={user.estado ? 'Activo' : 'Inactivo'}
                                             color={getStatusColor(user.estado)}
                                             size="small"
                                             sx={{ fontWeight: 500 }}
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        <IconButton size="small">
+                                        <IconButton size="small"
+                                            onClick={() => handleDelete(user.id_residentes, user.full_name)}
+                                            disabled={loading}
+                                            color="error"
+                                        >
+                                            <DeleteIcon sx={{ fontSize: '20px' }} />
+                                        </IconButton>
+                                        <IconButton size="small" >
                                             <MoreVertIcon sx={{ fontSize: '20px' }} />
                                         </IconButton>
                                     </TableCell>
@@ -217,10 +259,11 @@ export const UserManagement: React.FC = () => {
                     </Table>
                 </TableContainer>
             ) : (
+
                 <Stack spacing={2}>
-                    {filteredUsers.map((user: User) => (
+                    {filteredUsers.map((user: ResidenteAdmin) => (
                         <Card
-                            key={user.id}
+                            key={user.id_residentes}
                             sx={{
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                                 borderRadius: 2
@@ -229,32 +272,31 @@ export const UserManagement: React.FC = () => {
                             <CardContent>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                                     <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
-                                        {user.nombreCompleto}
+                                        {user.full_name}
                                     </Typography>
-                                    <IconButton size="small">
-                                        <MoreVertIcon sx={{ fontSize: '20px' }} />
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => handleDelete(user.id_residentes, user.full_name)}
+                                        disabled={loading}
+                                        color="error"
+                                    >
+                                        <DeleteIcon sx={{ fontSize: '20px' }} />
                                     </IconButton>
                                 </Box>
                                 <Stack spacing={1}>
                                     <Box>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Correo electrónico
-                                        </Typography>
-                                        <Typography variant="body2">{user.correo}</Typography>
+                                        <Typography variant="caption" color="text.secondary">Correo electrónico</Typography>
+                                        <Typography variant="body2">{user.contact_info}</Typography>
                                     </Box>
                                     <Box>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Rol
-                                        </Typography>
-                                        <Typography variant="body2">{user.rol}</Typography>
+                                        <Typography variant="caption" color="text.secondary">Rol</Typography>
+                                        <Typography variant="body2">{getRoleString(user.is_admin)}</Typography>
                                     </Box>
                                     <Box>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Estado
-                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">Estado</Typography>
                                         <Box sx={{ mt: 0.5 }}>
                                             <Chip
-                                                label={user.estado}
+                                                label={user.estado ? 'Activo' : 'Inactivo'}
                                                 color={getStatusColor(user.estado)}
                                                 size="small"
                                                 sx={{ fontWeight: 500 }}
