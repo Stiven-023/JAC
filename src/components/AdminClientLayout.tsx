@@ -7,6 +7,7 @@ import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useState } from "react";
 import NoticiasTable from "./admin/NoticiasTable";
 import { NoticiaConResidente } from "@/lib/supabase";
+import Eventos from "./admin/Eventos";
 
 interface AdminClientLayoutProps {
     initialResidents: ResidenteAdmin[];
@@ -76,7 +77,7 @@ export default function AdminClientLayout({
                             )}
                             
                             {/* Eventos */}
-                            {tabIndex === 2 && <Typography>Gestion de eventos</Typography>}
+                            {tabIndex === 2 && <Eventos/>}
                             
                             {/* Servicios y Solicitudes */}
                             {tabIndex === 3 && (
