@@ -3,6 +3,7 @@
 import React from 'react';
 import { Box, Typography, Alert, Paper, Tabs, Tab, useTheme, useMediaQuery, CircularProgress, Button} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+
 import {
     ServicioDisponible as ServiceAdmin,
     Solicitud,
@@ -10,6 +11,7 @@ import {
     actualizarServicioDisponible,
     eliminarServicioDisponible,
     actualizarEstadoSolicitud,
+    eliminarSolicitud,
     CrudResult
 } from '@/lib/adminActions';
 
@@ -17,7 +19,6 @@ import { ServiceTable } from './serviceManagementComponents/ServiceTable';
 import { ServiceCardList } from './serviceManagementComponents/ServiceCardList';
 import { ServiceEditDialog } from './serviceManagementComponents/ServiceEditDialog';
 import { RequestTable } from './serviceManagementComponents/RequestTable'; 
-
 
 interface ServiceEditFormData {
     titulo_servicio: string;
@@ -33,12 +34,15 @@ const initialServiceFormData: ServiceEditFormData = {
 };
 const getStatusColor = (isActive: boolean): 'success' | 'error' => isActive ? 'success' : 'error';
 const getStatusString = (isActive: boolean): string => isActive ? 'Activo' : 'Inactivo';
+
+//Vista de solicitudes
 const RequestListTab: React.FC<{ 
     requests: Solicitud[], 
     error: string | null,
     loading: boolean,
-    onUpdateStatus: (id: number, status: Solicitud['estado']) => void 
-}> = ({ requests, error, loading, onUpdateStatus }) => {
+    onUpdateStatus: (id: number, status: Solicitud['estado']) => void;
+    onDeleteRequest: (id: number) => void; // 💡 Nueva prop
+}> = ({ requests, error, loading, onUpdateStatus, onDeleteRequest }) => {
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h6" mb={2}>Solicitudes de Residentes ({requests.length})</Typography>
@@ -51,6 +55,7 @@ const RequestListTab: React.FC<{
                     requests={requests}
                     loading={loading}
                     onUpdateStatus={onUpdateStatus}
+                    onDelete={onDeleteRequest}
                 />
             )}
         </Box>
@@ -73,21 +78,21 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
     const muiTheme = useTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'), { noSsr: true });
 
-    // Estado para servicios y solicitudes
+    // ESTADOS
     const [services, setServices] = React.useState<ServiceAdmin[]>(initialServices ?? []);
-    const [requests, setRequests] = React.useState<Solicitud[]>(initialRequests ?? []); // Nuevo estado
+    const [requests, setRequests] = React.useState<Solicitud[]>(initialRequests ?? []);
     
     const [loading, setLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string | null>(initialServiceError || initialRequestError);
     const [isSaving, setIsSaving] = React.useState<boolean>(false);
     const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
-    // Estado del Diálogo de Edición/Creación
+    // Dialogs
     const [openEditDialog, setOpenEditDialog] = React.useState<boolean>(false);
     const [currentEditingService, setCurrentEditingService] = React.useState<ServiceAdmin | null>(null);
     const [serviceFormData, setServiceFormData] = React.useState<ServiceEditFormData>(initialServiceFormData);
 
-    // Pestañas internas
+    // Tabs
     const [internalTabIndex, setInternalTabIndex] = React.useState(0);
     const handleInternalTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setInternalTabIndex(newValue);
@@ -95,7 +100,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         setSuccessMessage(null);
     };
 
-    // Servicios del crud
+    // Handlers de servicios
     const handleOpenCreateDialog = () => {
         setCurrentEditingService(null);
         setServiceFormData(initialServiceFormData);
@@ -150,14 +155,12 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
                 result = await actualizarServicioDisponible(formData);
                 
                 if (result.success && result.data) {
-                    setServices(prevServices => prevServices.map(s => 
-                        s.id_servicio === result.data!.id_servicio ? result.data! : s
-                    ));
+                    setServices(prev => prev.map(s => s.id_servicio === result.data!.id_servicio ? result.data! : s));
                 }
             } else {
                 result = await crearServicioDisponible(formData);
                 if (result.success && result.data) {
-                    setServices(prevServices => [result.data!, ...prevServices]);
+                    setServices(prev => [result.data!, ...prev]);
                 }
             }
 
@@ -165,7 +168,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
                 setSuccessMessage(result.message || "Operación exitosa.");
                 handleCloseEditDialog();
             } else {
-                setError(result.message || "Error desconocido al guardar.");
+                setError(result.message || "Error al guardar.");
             }
         } catch (err) {
             console.error(err);
@@ -177,14 +180,13 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     const handleDelete = async (serviceId: number, serviceName: string) => {
         if (loading || isSaving) return;
-        if (confirm(`¿Estás seguro de eliminar "${serviceName}"?`)) {
+        if (confirm(`¿Eliminar servicio "${serviceName}"?`)) {
             setLoading(true);
             setError(null);
             setSuccessMessage(null);
-
+            
             try {
-                const result: CrudResult = await eliminarServicioDisponible(serviceId);
-
+                const result = await eliminarServicioDisponible(serviceId);
                 if (result.success) {
                     setServices(prev => prev.filter(s => s.id_servicio !== serviceId));
                     setSuccessMessage(result.message || "Servicio eliminado.");
@@ -192,7 +194,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
                     setError(result.message || "Error al eliminar.");
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Error capturado en el frontend:", err);
                 setError("Fallo crítico al eliminar.");
             } finally {
                 setLoading(false);
@@ -200,7 +202,8 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         }
     };
 
-    // Handler de actualzación de solicitudes
+    //Handlres de solicitudes
+    
     const handleUpdateStatus = async (id_solicitud: number, nuevoEstado: Solicitud['estado']) => {
         if (loading) return;
         setLoading(true);
@@ -208,7 +211,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         setSuccessMessage(null);
 
         try {
-            const result: CrudResult<Solicitud> = await actualizarEstadoSolicitud(id_solicitud, nuevoEstado);
+            const result = await actualizarEstadoSolicitud(id_solicitud, nuevoEstado);
 
             if (result.success && result.data) {
                 setRequests(prevRequests => 
@@ -222,11 +225,38 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             }
         } catch (err) {
             console.error(err);
-            setError("Error de conexión al actualizar solicitud.");
+            setError("Error de conexión.");
         } finally {
             setLoading(false);
         }
     };
+
+    // Handler de eliminar solicitud 
+    const handleDeleteRequest = async (id: number) => {
+        if (loading) return;
+        if (!confirm('¿Estás seguro de que quieres eliminar esta solicitud?')) return;
+
+        setLoading(true);
+        setError(null);
+        setSuccessMessage(null);
+
+        try {
+            const result = await eliminarSolicitud(id);
+
+            if (result.success) {
+                setRequests(prev => prev.filter(r => r.id_solicitud !== id));
+                setSuccessMessage(result.message || "Solicitud eliminada.");
+            } else {
+                setError(result.message || "Error al eliminar.");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Error crítico al eliminar.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (loading && services.length === 0 && requests.length === 0) 
         return (<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>);
 
@@ -251,7 +281,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             </Box>
 
             {services.length === 0 ? (
-                <Alert severity="info">No hay servicios maestros registrados.</Alert>
+                <Alert severity="info">No hay servicios registrados.</Alert>
             ) : isMobile ? (
                 <ServiceCardList
                     services={services}
@@ -292,6 +322,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
                     error={initialRequestError}
                     loading={loading}
                     onUpdateStatus={handleUpdateStatus}
+                    onDeleteRequest={handleDeleteRequest} // 💡 Pasamos la nueva función
                 />
             )}
 

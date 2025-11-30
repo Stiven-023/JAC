@@ -2,17 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import { supabaseAdmin } from './admin-config';
-import { ResidenteAdmin } from './residents';
-import { ServicioDisponible } from './services';
-import { CrudResult } from './types';
+import { ResidenteAdmin } from './residents'; 
+import { ServicioDisponible } from './services'; 
+import { CrudResult } from './types'; 
 
-
-/*export type CrudResult<T = unknown> = { success: boolean, message?: string, data?: T | null };*/
-
-// Tipos
+// --- Tipos ---
 export type Solicitud = {
     id_solicitud: number;
-    resident_id: string;
+    resident_id: string; 
     id_servicio: number;
     descripcion: string;
     direccion: string;
@@ -23,12 +20,12 @@ export type Solicitud = {
     resident_name: string;
 };
 
-// Tipo interno para la DB con relaciones
 type SolicitudDB = Omit<Solicitud, 'titulo_servicio' | 'resident_name'> & {
-    servicios_disponibles: Pick<ServicioDisponible, 'titulo_servicio'>;
-    residents: Pick<ResidenteAdmin, 'full_name'>;
+    servicios_disponibles: Pick<ServicioDisponible, 'titulo_servicio'> | null;
+    residents: Pick<ResidenteAdmin, 'full_name'> | null;
 };
 
+// 1. Obtener Lista
 export async function obtenerListaSolicitudesAdmin(): Promise<Solicitud[]> {
     const { data: solicitudes, error } = await supabaseAdmin
         .from('solicitudes')
@@ -47,8 +44,8 @@ export async function obtenerListaSolicitudesAdmin(): Promise<Solicitud[]> {
         .order('fecha_creacion', { ascending: false });
 
     if (error) {
-        console.error('Error al obtener la lista de solicitudes:', error.message);
-        throw new Error('No se pudo cargar la lista de solicitudes. Error de BD.');
+        console.error('Error al obtener solicitudes:', error.message);
+        throw new Error('No se pudo cargar la lista de solicitudes.');
     }
 
     return (solicitudes as unknown as SolicitudDB[]).map((row) => {
@@ -58,19 +55,18 @@ export async function obtenerListaSolicitudesAdmin(): Promise<Solicitud[]> {
             titulo_servicio: servicios_disponibles?.titulo_servicio || 'Servicio eliminado',
             resident_name: residents?.full_name || 'Usuario desconocido',
         };
-    }); 
+    }) as Solicitud[];
 }
 
+// 2. Actualizar Estado
 export async function actualizarEstadoSolicitud(id_solicitud: number, nuevoEstado: Solicitud['estado']): Promise<CrudResult<Solicitud>> {
-    if (!id_solicitud || !nuevoEstado) {
-        return { success: false, message: 'ID y nuevo estado son obligatorios.' };
-    }
-
+    if (!id_solicitud || !nuevoEstado) return { success: false, message: 'Datos incompletos.' };
+    
     try {
         const { data: updatedData, error } = await supabaseAdmin
             .from('solicitudes')
-            .update({
-                estado: nuevoEstado,
+            .update({ 
+                estado: nuevoEstado, 
                 fecha_actualizacion: new Date().toISOString()
             })
             .eq('id_solicitud', id_solicitud)
@@ -88,43 +84,33 @@ export async function actualizarEstadoSolicitud(id_solicitud: number, nuevoEstad
             `)
             .single();
 
-        if (error) {
-            console.error('Error al actualizar estado:', error.message);
-            return { success: false, message: 'Fallo al actualizar el estado.' };
-        }
+        if (error || !updatedData) return { success: false, message: 'Fallo al actualizar.' };
 
-        if (!updatedData) {
-            return { success: false, message: 'No se encontró la solicitud.' };
-        }
-        
         const rawData = updatedData as unknown as SolicitudDB;
-
         const { servicios_disponibles, residents, ...rest } = rawData;
 
         const requestFormatted: Solicitud = {
             ...rest,
-            titulo_servicio: servicios_disponibles?.titulo_servicio || 'Servicio eliminado',
-            resident_name: residents?.full_name || 'Usuario desconocido',
-        };
-        return {
-            success: true,
-            message: 'Estado actualizado correctamente.',
-            data: requestFormatted
+            titulo_servicio: servicios_disponibles?.titulo_servicio || 'Desconocido',
+            resident_name: residents?.full_name || 'Desconocido',
         };
 
+        return { success: true, message: 'Estado actualizado.', data: requestFormatted };
+
     } catch (e) {
-        console.error("Error crítico al actualizar estado:", e);
-        return { success: false, message: 'Error interno del servidor.' };
+        console.error("Error crítico:", e);
+        return { success: false, message: 'Error interno.' };
     }
 }
 
+// 3. Crear Solicitud (Sin cambios)
 export async function crearNuevaSolicitud(formData: FormData, residentId: string): Promise<CrudResult> {
     const id_servicio = formData.get('id_servicio') as string;
     const descripcion = formData.get('descripcion') as string;
     const direccion = formData.get('direccion') as string;
     
     if (!id_servicio || !descripcion || !direccion || !residentId) {
-        return { success: false, message: 'Faltan datos obligatorios para crear la solicitud.' };
+        return { success: false, message: 'Faltan datos.' };
     }
 
     try {
@@ -138,16 +124,37 @@ export async function crearNuevaSolicitud(formData: FormData, residentId: string
                 estado: 'en_tramite'
             });
 
-        if (error) {
-            console.error('Error crear solicitud:', error.message);
-            return { success: false, message: 'Fallo al registrar la solicitud.' };
-        }
+        if (error) return { success: false, message: 'Fallo al registrar.' };
         
         revalidatePath('/home/admin');
-        return { success: true, message: 'Solicitud enviada con éxito.' };
+        return { success: true, message: 'Solicitud enviada.' };
 
     } catch (e) {
-        console.error("Error crítico al crear solicitud:", e);
-        return { success: false, message: 'Error interno del servidor.' };
+        console.error("Error técnico al eliminar:", e);
+        return { success: false, message: 'Error interno.' };
+    }
+}
+
+// 4. Eliminar Solicitud (NUEVO)
+export async function eliminarSolicitud(id_solicitud: number): Promise<CrudResult> {
+    try {
+        const { error } = await supabaseAdmin
+            .from('solicitudes')
+            .delete()
+            .eq('id_solicitud', id_solicitud);
+
+        if (error) {
+            console.error('Error al eliminar solicitud:', error.message);
+            return { success: false, message: 'Fallo al eliminar.' };
+        }
+
+        // No es estrictamente necesario revalidatePath si actualizamos el estado local, pero ayuda a sincronizar.
+        // revalidatePath('/home/admin'); 
+        
+        return { success: true, message: 'Solicitud eliminada.' };
+
+    } catch (e) {
+        console.error("Error crítico al eliminar:", e);
+        return { success: false, message: 'Error interno.' };
     }
 }
