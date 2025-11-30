@@ -1,7 +1,5 @@
-// src/lib/admin/services.ts
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { supabaseAdmin } from './admin-config';
 
 // Tipos
@@ -13,7 +11,10 @@ export type ServicioDisponible = {
     is_activo: boolean;
 };
 
-// --- CRUD de Servicios Disponibles ---
+export type CrudResult = { success: boolean, message?: string, data?: ServicioDisponible | null };
+
+
+// CRUD de Servicios
 
 export async function obtenerListaServiciosAdmin(): Promise<ServicioDisponible[]> {
     const { data: servicios, error } = await supabaseAdmin
@@ -25,7 +26,7 @@ export async function obtenerListaServiciosAdmin(): Promise<ServicioDisponible[]
             descripcion_full,
             is_activo
         `)
-        .order('titulo_servicio', { ascending: true });
+        .order('id_servicio', { ascending: false });
 
     if (error) {
         console.error('Error al obtener la lista de servicios disponibles:', error.message);
@@ -35,36 +36,41 @@ export async function obtenerListaServiciosAdmin(): Promise<ServicioDisponible[]
     return servicios as ServicioDisponible[];
 }
 
-export async function crearServicioDisponible(formData: FormData) {
+export async function crearServicioDisponible(formData: FormData): Promise<CrudResult> {
     const titulo_servicio = formData.get('titulo_servicio') as string;
     const descripcion_short = formData.get('descripcion_short') as string;
     const descripcion_full = formData.get('descripcion_full') as string | null;
-    const is_activo = formData.get('is_activo') === 'true'; 
+    const is_activo = formData.get('is_activo') === 'true';
 
     if (!titulo_servicio || !descripcion_short) {
         return { success: false, message: 'Faltan campos obligatorios (Título y descripción corta).' };
     }
 
     try {
-        const { error } = await supabaseAdmin
+        const { data: newService, error } = await supabaseAdmin
             .from('servicios_disponibles')
             .insert({
                 titulo_servicio,
                 descripcion_short,
                 descripcion_full: descripcion_full || null,
                 is_activo,
-            });
+            })
+            .select(`id_servicio, titulo_servicio, descripcion_short, descripcion_full, is_activo`)
+            .single();
 
         if (error) {
             console.error('Error al crear servicio:', error.message);
-            if (error.code === '23505') { 
-                 return { success: false, message: `El servicio "${titulo_servicio}" ya existe.` };
+            if (error.code === '23505') {
+                return { success: false, message: `El servicio "${titulo_servicio}" ya existe.` };
             }
             return { success: false, message: 'Fallo al registrar el nuevo servicio.' };
         }
 
-        revalidatePath('/home/admin');
-        return { success: true, message: 'Servicio creado exitosamente.' };
+        return {
+            success: true,
+            message: 'Servicio creado exitosamente.',
+            data: newService
+        };
 
     } catch (e) {
         console.error("Error crítico al crear servicio:", e);
@@ -72,19 +78,19 @@ export async function crearServicioDisponible(formData: FormData) {
     }
 }
 
-export async function actualizarServicioDisponible(formData: FormData) {
+export async function actualizarServicioDisponible(formData: FormData): Promise<CrudResult> {
     const id_servicio = formData.get('id_servicio') as string;
     const titulo_servicio = formData.get('titulo_servicio') as string;
     const descripcion_short = formData.get('descripcion_short') as string;
     const descripcion_full = formData.get('descripcion_full') as string | null;
-    const is_activo = formData.get('is_activo') === 'true'; 
+    const is_activo = formData.get('is_activo') === 'true';
 
     if (!id_servicio || !titulo_servicio || !descripcion_short) {
         return { success: false, message: 'Faltan campos obligatorios o ID del servicio.' };
     }
 
     try {
-        const { error } = await supabaseAdmin
+        const { data: updatedService, error } = await supabaseAdmin
             .from('servicios_disponibles')
             .update({
                 titulo_servicio,
@@ -92,18 +98,23 @@ export async function actualizarServicioDisponible(formData: FormData) {
                 descripcion_full: descripcion_full || null,
                 is_activo,
             })
-            .eq('id_servicio', parseInt(id_servicio));
+            .eq('id_servicio', parseInt(id_servicio))
+            .select(`id_servicio, titulo_servicio, descripcion_short, descripcion_full, is_activo`)
+            .single();
 
         if (error) {
             console.error('Error al actualizar servicio:', error.message);
-             if (error.code === '23505') { 
-                 return { success: false, message: `El servicio "${titulo_servicio}" ya existe con otro registro.` };
+            if (error.code === '23505') {
+                return { success: false, message: `El servicio "${titulo_servicio}" ya existe con otro registro.` };
             }
             return { success: false, message: 'Fallo al actualizar el servicio.' };
         }
 
-        revalidatePath('/home/admin');
-        return { success: true, message: 'Servicio actualizado exitosamente.' };
+        return {
+            success: true,
+            message: 'Servicio actualizado exitosamente.',
+            data: updatedService
+        };
 
     } catch (e) {
         console.error("Error crítico al actualizar servicio:", e);
@@ -111,12 +122,13 @@ export async function actualizarServicioDisponible(formData: FormData) {
     }
 }
 
-export async function eliminarServicioDisponible(id_servicio: number) {
+export async function eliminarServicioDisponible(id_servicio: number): Promise<CrudResult> {
     if (!id_servicio) {
         return { success: false, message: 'ID del servicio es obligatorio para eliminar.' };
     }
-    
+
     try {
+
         const { error } = await supabaseAdmin
             .from('servicios_disponibles')
             .delete()
@@ -124,13 +136,12 @@ export async function eliminarServicioDisponible(id_servicio: number) {
 
         if (error) {
             console.error('Error al eliminar servicio:', error.message);
-            if (error.code === '23503') { 
-                 return { success: false, message: 'No se puede eliminar: Este servicio tiene solicitudes asociadas activas.' };
+            if (error.code === '23503') {
+                return { success: false, message: 'No se puede eliminar: Este servicio tiene solicitudes asociadas activas.' };
             }
             return { success: false, message: 'Fallo al eliminar el servicio.' };
         }
 
-        revalidatePath('/home/admin');
         return { success: true, message: 'Servicio eliminado exitosamente.' };
 
     } catch (e) {

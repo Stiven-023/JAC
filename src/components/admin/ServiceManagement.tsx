@@ -9,7 +9,8 @@ import {
     Solicitud,
     crearServicioDisponible,
     actualizarServicioDisponible,
-    eliminarServicioDisponible
+    eliminarServicioDisponible,
+    CrudResult
 } from '@/lib/adminActions';
 
 import { ServiceTable } from './serviceManagementComponents/ServiceTable';
@@ -111,7 +112,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         setError(null);
     }
 
-    // --- ACCIONES CRUD ---
+    // --- ACCIONES CRUD (CORREGIDA) ---
 
     const handleSaveService = async () => {
         if (isSaving) return;
@@ -133,15 +134,26 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             formData.append('descripcion_full', serviceFormData.descripcion_full || '');
             formData.append('is_activo', String(serviceFormData.is_activo));
 
-            let result: { success: boolean, message?: string };
-
+            let result: CrudResult; 
             if (currentEditingService) {
                 // Actualizar
                 formData.append('id_servicio', String(currentEditingService.id_servicio));
                 result = await actualizarServicioDisponible(formData);
+                
+                if (result.success && result.data) {
+                    setServices(prevServices => prevServices.map(s => 
+                        s.id_servicio === result.data!.id_servicio 
+                            ? result.data! as ServiceAdmin 
+                            : s
+                    ));
+                }
             } else {
                 // Crear
                 result = await crearServicioDisponible(formData);
+                
+                if (result.success && result.data) {
+                    setServices(prevServices => [result.data! as ServiceAdmin, ...prevServices]);
+                }
             }
 
             if (result.success) {
@@ -166,7 +178,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             setSuccessMessage(null);
 
             try {
-                const result: { success: boolean, message?: string } = await eliminarServicioDisponible(serviceId);
+                const result: CrudResult = await eliminarServicioDisponible(serviceId);
 
                 if (result.success) {
                     setServices(prev => prev.filter(s => s.id_servicio !== serviceId));
@@ -183,35 +195,25 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         }
     };
 
-
-    // Renderizado inicial (carga o error crítico)
     if (loading && services.length === 0) return (<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>);
 
     const serviceListTabContent = (
         <Box sx={{ p: 3, position: 'relative' }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>Operación fallida: {error}</Alert>}
             {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
-
-            {/* BARRA DE TÍTULO Y BOTÓN DE ACCIÓN (NUEVO BLOQUE) */}
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-
-                {/* TÍTULO DE LA LISTA */}
                 <Typography variant="h6">Servicios Disponibles ({services.length})</Typography>
-
-                {/* BOTÓN ESTÁNDAR DE CREACIÓN */}
                 <Button
                     variant="contained"
                     color={'error'}
-                    onClick={handleOpenCreateDialog} // Misma lógica
-                    disabled={loading || isSaving} // Misma lógica
-                    startIcon={<AddIcon />} // Icono
+                    onClick={handleOpenCreateDialog} 
+                    disabled={loading || isSaving}
+                    startIcon={<AddIcon />} 
                     sx={{ textTransform: 'none' }}
                 >
                     Crear Nuevo Servicio
                 </Button>
             </Box>
-
-            {/* LISTA DE RESULTADOS (SIN CAMBIOS) */}
             {services.length === 0 ? (
                 <Alert severity="info">No hay servicios maestros registrados.</Alert>
             ) : isMobile ? (
@@ -238,7 +240,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     return (
         <Paper elevation={1} sx={{ p: 0, borderRadius: 2, maxWidth: '1400px', margin: '0 auto', overflow: 'hidden' }}>
-            {/* Cabecera de Pestañas Internas */}
+
             <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: '#f5f5f5' }}>
                 <Tabs value={internalTabIndex} onChange={handleInternalTabChange} aria-label="internal service management tabs">
                     <Tab label="Servicios Disponibles" />
