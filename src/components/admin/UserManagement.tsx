@@ -1,4 +1,3 @@
-// Tu archivo original (UserManagement.tsx)
 'use client'
 
 import React from 'react';

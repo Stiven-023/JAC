@@ -241,7 +241,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             {/* Cabecera de Pestañas Internas */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: '#f5f5f5' }}>
                 <Tabs value={internalTabIndex} onChange={handleInternalTabChange} aria-label="internal service management tabs">
-                    <Tab label="Servicios Disponibles (CRUD)" />
+                    <Tab label="Servicios Disponibles" />
                     <Tab label="Solicitudes Entrantes" />
                 </Tabs>
             </Box>

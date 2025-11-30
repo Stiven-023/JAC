@@ -2,12 +2,12 @@
 
 
 import { revalidatePath } from 'next/cache'
-import type { Noticia } from '../supabase'
+import type { Noticia, NoticiaConResidente } from '../supabase'
 import { supabase } from '../supabase'
 
 export type ActionResult = {
   success: boolean
-  data?: Noticia | Noticia[]
+  data?: Noticia | NoticiaConResidente[] | NoticiaConResidente 
   error?: string
 }
 
@@ -15,11 +15,11 @@ export async function getNoticias(): Promise<ActionResult> {
   try {
     const { data, error } = await supabase
       .from('noticia')
-      .select('*')
+      .select(`*, residents (full_name) `)
       .order('fecha_publicacion', { ascending: false })
 
     if (error) throw error
-    return { success: true, data: data || [] }
+    return { success: true, data: data || [] as NoticiaConResidente[]}
   } catch (error) {
     console.error('Error fetching noticias:', error)
     return { success: false, error: 'Error al obtener las noticias' }
@@ -38,7 +38,7 @@ export async function createNoticia(formData: {
         ...formData,
         fecha_publicacion: new Date().toISOString()
       }])
-      .select()
+      .select(`*, residents (full_name)`)
       .single()
 
     if (error) throw error
@@ -64,7 +64,7 @@ export async function updateNoticia(
       .from('noticia')
       .update(formData)
       .eq('id_noticia', id)
-      .select()
+      .select(`*, residents (full_name) `)
       .single()
 
     if (error) throw error
