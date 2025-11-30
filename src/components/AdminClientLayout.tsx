@@ -1,19 +1,39 @@
 'use client';
 
-import { UserManagement } from "@/components/UserManagement";
-import { ResidenteAdmin } from "@/lib/adminActions";
+import { UserManagement } from "@/components/admin/UserManagement";
+import { ServiceManagement } from "@/components/admin/ServiceManagement";
+import { ResidenteAdmin, ServicioDisponible, Solicitud } from "@/lib/adminActions";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useState } from "react";
 import NoticiasTable from "./admin/NoticiasTable";
-import { Noticia } from "@/lib/supabase";
+import { NoticiaConResidente } from "@/lib/supabase";
 
 interface AdminClientLayoutProps {
     initialResidents: ResidenteAdmin[];
-    initialNoticias?: Noticia[]
-    initialError: string | null;
+    initialError: string | null; 
+
+    // PROPS DE SERVICIOS
+    initialServices: ServicioDisponible[];
+    serviceError: string | null;
+
+    // PROPS DE SOLICITUDES
+    initialRequests: Solicitud[];
+    requestError: string | null;
+    
+    // PROPS DE NOTICIAS
+    initialNoticias: NoticiaConResidente[];
 }
 
-export default function AdminClientLayout({ initialResidents, initialError, initialNoticias }: AdminClientLayoutProps) {
+
+export default function AdminClientLayout({ 
+    initialResidents, 
+    initialError, 
+    initialServices, 
+    serviceError,
+    initialRequests, 
+    requestError,
+    initialNoticias 
+}: AdminClientLayoutProps) { 
 
     const [tabIndex, setTabIndex] = useState(0);
 
@@ -35,23 +55,38 @@ export default function AdminClientLayout({ initialResidents, initialError, init
                                 variant="scrollable"
                                 scrollButtons="auto"
                             >
-                                <Tab label={"Usuarios"} />
-                                <Tab label={"Noticias"} />
-                                <Tab label={"Eventos"} />
-                                <Tab label={"Servicios"} />
+                                <Tab label={"Usuarios"} />     
+                                <Tab label={"Noticias"} />       
+                                <Tab label={"Eventos"} />        
+                                <Tab label={"Servicios"} />      
                             </Tabs>
                         </Box>
                         <Box sx={{ padding: 2 }} style={{ maxWidth: '-webkit-fill-available' }}>
+                            {/* Usuarios */}
                             {tabIndex === 0 && (
                                 <UserManagement
-                                    // Datos que cargó el Server Component
                                     initialResidents={initialResidents}
                                     initialError={initialError}
                                 />
                             )}
-                            {tabIndex === 1 && <NoticiasTable initialNoticias={initialNoticias ?? []}/>}
+                            
+                            {/*  Noticias */}
+                            {tabIndex === 1 && (
+                                <NoticiasTable initialNoticias={initialNoticias} />
+                            )}
+                            
+                            {/* Eventos */}
                             {tabIndex === 2 && <Typography>Gestion de eventos</Typography>}
-                            {tabIndex === 3 && <Typography>Gestion de servicios</Typography>}
+                            
+                            {/* Servicios y Solicitudes */}
+                            {tabIndex === 3 && (
+                                <ServiceManagement
+                                    initialServices={initialServices}
+                                    initialServiceError={serviceError} 
+                                    initialRequests={initialRequests}
+                                    initialRequestError={requestError} 
+                                />
+                            )}
                         </Box>
                     </Box>
                 </Grid>

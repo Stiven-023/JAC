@@ -4,8 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-
-// --- CONFIGURACIÓN DE CONEXIÓN CON SUPABASE
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -13,11 +11,11 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Variables de entorno de Supabase incompletas.');
 }
 
-// Cliente con permisos de administrador (service role key)
+// Cliente con permisos de administrador
 const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 
-// --- REGISTRO DE USUARIO ---
+// Registro usuario
 export async function registrarUsuario(formData: FormData) {
 
   let email = formData.get('email') as string;
@@ -82,7 +80,7 @@ export async function registrarUsuario(formData: FormData) {
     return { success: false, message: `Ya existe un residente registrado con el documento: ${document_number}.` };
   }
 
-  // 1. REGISTRO EN AUTH (Crea el usuario)
+  // registro en Auth
   const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
     email,
     password,
@@ -98,7 +96,7 @@ export async function registrarUsuario(formData: FormData) {
     return { success: false, message: authError.message };
   }
 
-  // --- 2. REGISTRO DE RESIDENTE ---
+  // Registro en residents 
   const userId = authData.user?.id;
 
   if (userId) {
@@ -116,8 +114,6 @@ export async function registrarUsuario(formData: FormData) {
 
     if (dbError) {
       console.error('Error al insertar en tabla residents:', dbError.message);
-
-      // 3. ¡ROLLBACK! Si falla la inserción del perfil, se elimina el usuario de Auth.
       const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
       if (deleteError) {
@@ -145,11 +141,9 @@ export async function registrarUsuario(formData: FormData) {
 export async function iniciarSesion(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-
-  // 1. Crear cliente de Supabase para manejo de cookies
   const supabase = createRouteHandlerClient({ cookies });
 
-  // 2. Iniciar sesión
+  // Iniciar sesión
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
