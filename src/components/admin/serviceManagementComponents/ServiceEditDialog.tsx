@@ -1,10 +1,7 @@
-// serviceManagementComponents/ServiceEditDialog.tsx
 'use client';
 
 import React from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Switch, FormControlLabel, Alert, Box, CircularProgress} from '@mui/material';
-
-// Asegúrate de usar los tipos correctos para el Servicio
 import { ServicioDisponible as ServiceAdmin } from '@/lib/adminActions'; 
 
 interface ServiceEditFormData {

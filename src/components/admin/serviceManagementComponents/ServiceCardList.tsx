@@ -1,12 +1,9 @@
-// serviceManagementComponents/ServiceCardList.tsx
 'use client';
 
 import React from 'react';
 import { Box, Stack, Card, CardContent, Typography, Chip, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-// Asegúrate de usar los tipos correctos para el Servicio
 import { ServicioDisponible as ServiceAdmin } from '@/lib/adminActions'; 
 
 interface ServiceCardListProps {

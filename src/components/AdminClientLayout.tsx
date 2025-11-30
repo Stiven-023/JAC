@@ -8,11 +8,9 @@ import { useState } from "react";
 import NoticiasTable from "./admin/NoticiasTable";
 import { NoticiaConResidente } from "@/lib/supabase";
 
-// --- 1. INTERFAZ DE PROPS ÚNICA Y COMPLETA ---
 interface AdminClientLayoutProps {
-    // PROPS DE USUARIOS
     initialResidents: ResidenteAdmin[];
-    initialError: string | null;      // Error de la carga de Residentes/Noticias
+    initialError: string | null; 
 
     // PROPS DE SERVICIOS
     initialServices: ServicioDisponible[];
@@ -22,13 +20,12 @@ interface AdminClientLayoutProps {
     initialRequests: Solicitud[];
     requestError: string | null;
     
-    // PROPS DE NOTICIAS (Añadida, ya que se usa)
+    // PROPS DE NOTICIAS
     initialNoticias: NoticiaConResidente[];
 }
-// --------------------------------------------------
+
 
 export default function AdminClientLayout({ 
-    // Desestructuración de TODAS las props definidas en la interfaz
     initialResidents, 
     initialError, 
     initialServices, 
@@ -58,36 +55,36 @@ export default function AdminClientLayout({
                                 variant="scrollable"
                                 scrollButtons="auto"
                             >
-                                <Tab label={"Usuarios"} />        {/* tabIndex = 0 */}
-                                <Tab label={"Noticias"} />        {/* tabIndex = 1 */}
-                                <Tab label={"Eventos"} />         {/* tabIndex = 2 */}
-                                <Tab label={"Servicios"} />       {/* tabIndex = 3 */}
+                                <Tab label={"Usuarios"} />     
+                                <Tab label={"Noticias"} />       
+                                <Tab label={"Eventos"} />        
+                                <Tab label={"Servicios"} />      
                             </Tabs>
                         </Box>
                         <Box sx={{ padding: 2 }} style={{ maxWidth: '-webkit-fill-available' }}>
-                            {/* Pestaña 0: Gestión de Usuarios */}
+                            {/* Usuarios */}
                             {tabIndex === 0 && (
                                 <UserManagement
                                     initialResidents={initialResidents}
-                                    initialError={initialError} // Error de Residentes
+                                    initialError={initialError}
                                 />
                             )}
                             
-                            {/* Pestaña 1: Gestión de Noticias */}
+                            {/*  Noticias */}
                             {tabIndex === 1 && (
                                 <NoticiasTable initialNoticias={initialNoticias} />
                             )}
                             
-                            {/* Pestaña 2: Gestión de Eventos */}
+                            {/* Eventos */}
                             {tabIndex === 2 && <Typography>Gestion de eventos</Typography>}
                             
-                            {/* Pestaña 3: Servicios y Solicitudes */}
+                            {/* Servicios y Solicitudes */}
                             {tabIndex === 3 && (
                                 <ServiceManagement
                                     initialServices={initialServices}
-                                    initialServiceError={serviceError} // Nota: Renombrar a 'initialServiceError' si el componente ServiceManagement lo requiere
+                                    initialServiceError={serviceError} 
                                     initialRequests={initialRequests}
-                                    initialRequestError={requestError} // Nota: Renombrar a 'initialRequestError' si el componente ServiceManagement lo requiere
+                                    initialRequestError={requestError} 
                                 />
                             )}
                         </Box>

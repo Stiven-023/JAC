@@ -1,28 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-// Importa los tipos correctos de tu archivo de tipos de Supabase
 import type { NoticiaConResidente } from '@/lib/supabase' 
 import { supabase } from '@/lib/supabase'
-
-// El resultado puede ser un array o un solo objeto, pero SIEMPRE del tipo anidado
 export type ActionResult = {
   success: boolean
   data?: NoticiaConResidente[] | NoticiaConResidente 
   error?: string
 }
 
-// 1. OBTENER (Lectura)
 export async function getNoticias(): Promise<ActionResult> {
   try {
     const { data, error } = await supabase
       .from('noticia')
-      .select(`*, residents (full_name)`) // JOIN correcto
+      .select(`*, residents (full_name)`)
       .order('fecha_publicacion', { ascending: false })
 
     if (error) throw error
     
-    // Devolvemos directamente el tipo anidado
     return { success: true, data: data as NoticiaConResidente[] } 
   } catch (error) {
     console.error('Error fetching noticias:', error)
@@ -30,7 +25,6 @@ export async function getNoticias(): Promise<ActionResult> {
   }
 }
 
-// 2. CREAR
 export async function createNoticia(formData: {
   resident_id: string
   titulo: string
@@ -43,7 +37,7 @@ export async function createNoticia(formData: {
         ...formData,
         fecha_publicacion: new Date().toISOString()
       }])
-      .select(`*, residents (full_name)`) // JOIN para obtener el nombre inmediatamente
+      .select(`*, residents (full_name)`)
       .single()
 
     if (error) throw error
@@ -56,7 +50,6 @@ export async function createNoticia(formData: {
   }
 }
 
-// 3. ACTUALIZAR
 export async function updateNoticia(
   id: number,
   formData: {
@@ -70,7 +63,7 @@ export async function updateNoticia(
       .from('noticia')
       .update(formData)
       .eq('id_noticia', id)
-      .select(`*, residents (full_name)`) // JOIN para obtener el nombre inmediatamente
+      .select(`*, residents (full_name)`)
       .single()
 
     if (error) throw error
@@ -83,7 +76,6 @@ export async function updateNoticia(
   }
 }
 
-// 4. ELIMINAR (Sin cambios, no devuelve datos complejos)
 export async function deleteNoticia(id: number): Promise<ActionResult> {
   try {
     const { error } = await supabase

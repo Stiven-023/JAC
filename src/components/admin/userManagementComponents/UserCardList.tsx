@@ -1,4 +1,3 @@
-// src/components/UserCardList.tsx
 import React from 'react';
 import { Box, Card, CardContent, Stack, Typography, Chip, IconButton } from '@mui/material';
 import EditIcon from "@mui/icons-material/Edit";

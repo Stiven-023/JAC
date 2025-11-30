@@ -6,7 +6,7 @@ import { ResidenteAdmin } from './residents';
 import { ServicioDisponible } from './services'; 
 import { CrudResult } from './types'; 
 
-// --- Tipos ---
+// Tipos
 export type Solicitud = {
     id_solicitud: number;
     resident_id: string; 
@@ -25,7 +25,7 @@ type SolicitudDB = Omit<Solicitud, 'titulo_servicio' | 'resident_name'> & {
     residents: Pick<ResidenteAdmin, 'full_name'> | null;
 };
 
-// 1. Obtener Lista
+// Obtener lista de solicitudes
 export async function obtenerListaSolicitudesAdmin(): Promise<Solicitud[]> {
     const { data: solicitudes, error } = await supabaseAdmin
         .from('solicitudes')
@@ -58,7 +58,7 @@ export async function obtenerListaSolicitudesAdmin(): Promise<Solicitud[]> {
     }) as Solicitud[];
 }
 
-// 2. Actualizar Estado
+// Actualizar Estado
 export async function actualizarEstadoSolicitud(id_solicitud: number, nuevoEstado: Solicitud['estado']): Promise<CrudResult<Solicitud>> {
     if (!id_solicitud || !nuevoEstado) return { success: false, message: 'Datos incompletos.' };
     
@@ -103,7 +103,7 @@ export async function actualizarEstadoSolicitud(id_solicitud: number, nuevoEstad
     }
 }
 
-// 3. Crear Solicitud (Sin cambios)
+// Crear Solicitud
 export async function crearNuevaSolicitud(formData: FormData, residentId: string): Promise<CrudResult> {
     const id_servicio = formData.get('id_servicio') as string;
     const descripcion = formData.get('descripcion') as string;
@@ -135,7 +135,6 @@ export async function crearNuevaSolicitud(formData: FormData, residentId: string
     }
 }
 
-// 4. Eliminar Solicitud (NUEVO)
 export async function eliminarSolicitud(id_solicitud: number): Promise<CrudResult> {
     try {
         const { error } = await supabaseAdmin
@@ -147,9 +146,6 @@ export async function eliminarSolicitud(id_solicitud: number): Promise<CrudResul
             console.error('Error al eliminar solicitud:', error.message);
             return { success: false, message: 'Fallo al eliminar.' };
         }
-
-        // No es estrictamente necesario revalidatePath si actualizamos el estado local, pero ayuda a sincronizar.
-        // revalidatePath('/home/admin'); 
         
         return { success: true, message: 'Solicitud eliminada.' };
 

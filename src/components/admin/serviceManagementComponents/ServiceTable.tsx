@@ -4,8 +4,6 @@ import React from 'react';
 import {TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Chip, IconButton, Tooltip, Paper, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-// Asegúrate de usar los tipos correctos para el Servicio
 import { ServicioDisponible as ServiceAdmin } from '@/lib/adminActions'; 
 
 interface ServiceTableProps {

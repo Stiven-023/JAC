@@ -1,4 +1,3 @@
-// src/components/UserTable.tsx
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, IconButton, CircularProgress } from '@mui/material';
 import EditIcon from "@mui/icons-material/Edit";

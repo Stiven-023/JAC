@@ -9,7 +9,6 @@ import { UserTable } from './userManagementComponents/UserTable';
 import { UserCardList } from './userManagementComponents/UserCardList';
 import { UserEditDialog } from './userManagementComponents/UserEditDialog';
 
-//
 interface UserEditFormData { full_name: string; contact_info: string; is_admin: boolean; estado: boolean; }
 interface UserManagementProps { initialResidents: ResidenteAdmin[] | null | undefined; initialError: string | null; }
 
@@ -145,7 +144,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
                 </Alert>
             )}
 
-            {/* BARRA DE FILTROS Y BÚSQUEDA */}
+            {/* Barra de filtros y busqueda */}
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
@@ -185,7 +184,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
                 </TextField>
             </Stack>
 
-            {/* LISTA DE RESULTADOS */}
+            {/* Resultados */}
             {filteredUsers.length === 0 ? (
                 <Alert severity="info">No se encontraron usuarios que coincidan con los filtros.</Alert>
             ) : isMobile ? (
@@ -207,9 +206,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ initialResidents
                     getStatusColor={getStatusColor}
                 />
             )}
-
-
-            {/* DIÁLOGO DE EDICIÓN (COMPONENTE MODULAR) */}
+            
             <UserEditDialog
                 open={openEditDialog}
                 currentEditingUser={currentEditingUser}
