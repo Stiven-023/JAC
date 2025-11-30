@@ -1,6 +1,7 @@
 'use server';
 
 import { supabaseAdmin } from './admin-config';
+import { CrudResult } from './types';
 
 // Tipos
 export type ServicioDisponible = {
@@ -11,7 +12,7 @@ export type ServicioDisponible = {
     is_activo: boolean;
 };
 
-export type CrudResult = { success: boolean, message?: string, data?: ServicioDisponible | null };
+/*export type CrudResult = { success: boolean, message?: string, data?: ServicioDisponible | null };*/
 
 
 // CRUD de Servicios
@@ -36,7 +37,7 @@ export async function obtenerListaServiciosAdmin(): Promise<ServicioDisponible[]
     return servicios as ServicioDisponible[];
 }
 
-export async function crearServicioDisponible(formData: FormData): Promise<CrudResult> {
+export async function crearServicioDisponible(formData: FormData): Promise<CrudResult<ServicioDisponible>> {
     const titulo_servicio = formData.get('titulo_servicio') as string;
     const descripcion_short = formData.get('descripcion_short') as string;
     const descripcion_full = formData.get('descripcion_full') as string | null;
@@ -78,7 +79,7 @@ export async function crearServicioDisponible(formData: FormData): Promise<CrudR
     }
 }
 
-export async function actualizarServicioDisponible(formData: FormData): Promise<CrudResult> {
+export async function actualizarServicioDisponible(formData: FormData): Promise<CrudResult<ServicioDisponible>> {
     const id_servicio = formData.get('id_servicio') as string;
     const titulo_servicio = formData.get('titulo_servicio') as string;
     const descripcion_short = formData.get('descripcion_short') as string;

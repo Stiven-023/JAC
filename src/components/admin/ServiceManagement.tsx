@@ -3,19 +3,21 @@
 import React from 'react';
 import { Box, Typography, Alert, Paper, Tabs, Tab, useTheme, useMediaQuery, CircularProgress, Button} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-
 import {
     ServicioDisponible as ServiceAdmin,
     Solicitud,
     crearServicioDisponible,
     actualizarServicioDisponible,
     eliminarServicioDisponible,
+    actualizarEstadoSolicitud,
     CrudResult
 } from '@/lib/adminActions';
 
 import { ServiceTable } from './serviceManagementComponents/ServiceTable';
 import { ServiceCardList } from './serviceManagementComponents/ServiceCardList';
 import { ServiceEditDialog } from './serviceManagementComponents/ServiceEditDialog';
+import { RequestTable } from './serviceManagementComponents/RequestTable'; 
+
 
 interface ServiceEditFormData {
     titulo_servicio: string;
@@ -31,17 +33,25 @@ const initialServiceFormData: ServiceEditFormData = {
 };
 const getStatusColor = (isActive: boolean): 'success' | 'error' => isActive ? 'success' : 'error';
 const getStatusString = (isActive: boolean): string => isActive ? 'Activo' : 'Inactivo';
-//
-const RequestListTab: React.FC<{ requests: Solicitud[], error: string | null }> = ({ requests, error }) => {
+const RequestListTab: React.FC<{ 
+    requests: Solicitud[], 
+    error: string | null,
+    loading: boolean,
+    onUpdateStatus: (id: number, status: Solicitud['estado']) => void 
+}> = ({ requests, error, loading, onUpdateStatus }) => {
     return (
         <Box sx={{ p: 3 }}>
             <Typography variant="h6" mb={2}>Solicitudes de Residentes ({requests.length})</Typography>
-            {error && <Alert severity="error">{error}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            
             {requests.length === 0 && !error ? (
                 <Alert severity="info">No hay solicitudes nuevas en el sistema.</Alert>
             ) : (
-
-                <Typography>Mostrando {requests.length} solicitudes.</Typography>
+                <RequestTable 
+                    requests={requests}
+                    loading={loading}
+                    onUpdateStatus={onUpdateStatus}
+                />
             )}
         </Box>
     );
@@ -63,9 +73,12 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
     const muiTheme = useTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'), { noSsr: true });
 
+    // Estado para servicios y solicitudes
     const [services, setServices] = React.useState<ServiceAdmin[]>(initialServices ?? []);
+    const [requests, setRequests] = React.useState<Solicitud[]>(initialRequests ?? []); // Nuevo estado
+    
     const [loading, setLoading] = React.useState<boolean>(false);
-    const [error, setError] = React.useState<string | null>(initialServiceError);
+    const [error, setError] = React.useState<string | null>(initialServiceError || initialRequestError);
     const [isSaving, setIsSaving] = React.useState<boolean>(false);
     const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
@@ -82,6 +95,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         setSuccessMessage(null);
     };
 
+    // Servicios del crud
     const handleOpenCreateDialog = () => {
         setCurrentEditingService(null);
         setServiceFormData(initialServiceFormData);
@@ -112,12 +126,8 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         setError(null);
     }
 
-    // --- ACCIONES CRUD (CORREGIDA) ---
-
     const handleSaveService = async () => {
         if (isSaving) return;
-
-        // Validación
         if (!serviceFormData.titulo_servicio || !serviceFormData.descripcion_short) {
             setError("El título y la descripción corta no pueden estar vacíos.");
             return;
@@ -134,37 +144,32 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
             formData.append('descripcion_full', serviceFormData.descripcion_full || '');
             formData.append('is_activo', String(serviceFormData.is_activo));
 
-            let result: CrudResult; 
+            let result: CrudResult<ServiceAdmin>; 
             if (currentEditingService) {
-                // Actualizar
                 formData.append('id_servicio', String(currentEditingService.id_servicio));
                 result = await actualizarServicioDisponible(formData);
                 
                 if (result.success && result.data) {
                     setServices(prevServices => prevServices.map(s => 
-                        s.id_servicio === result.data!.id_servicio 
-                            ? result.data! as ServiceAdmin 
-                            : s
+                        s.id_servicio === result.data!.id_servicio ? result.data! : s
                     ));
                 }
             } else {
-                // Crear
                 result = await crearServicioDisponible(formData);
-                
                 if (result.success && result.data) {
-                    setServices(prevServices => [result.data! as ServiceAdmin, ...prevServices]);
+                    setServices(prevServices => [result.data!, ...prevServices]);
                 }
             }
 
             if (result.success) {
-                setSuccessMessage(result.message || (currentEditingService ? "Servicio actualizado." : "Servicio creado."));
+                setSuccessMessage(result.message || "Operación exitosa.");
                 handleCloseEditDialog();
             } else {
-                setError(result.message || "Error desconocido al guardar el servicio.");
+                setError(result.message || "Error desconocido al guardar.");
             }
         } catch (err) {
-            console.error("[CLIENTE] Fallo crítico al guardar el servicio:", err);
-            setError("Fallo crítico en la conexión al intentar guardar.");
+            console.error(err);
+            setError("Fallo crítico al guardar.");
         } finally {
             setIsSaving(false);
         }
@@ -172,7 +177,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     const handleDelete = async (serviceId: number, serviceName: string) => {
         if (loading || isSaving) return;
-        if (confirm(`¿Estás seguro de que quieres eliminar el servicio "${serviceName}"? Esta acción es irreversible.`)) {
+        if (confirm(`¿Estás seguro de eliminar "${serviceName}"?`)) {
             setLoading(true);
             setError(null);
             setSuccessMessage(null);
@@ -182,45 +187,69 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
                 if (result.success) {
                     setServices(prev => prev.filter(s => s.id_servicio !== serviceId));
-                    setSuccessMessage(result.message || "Servicio eliminado exitosamente.");
+                    setSuccessMessage(result.message || "Servicio eliminado.");
                 } else {
-                    setError(result.message || "Error desconocido al eliminar el servicio.");
+                    setError(result.message || "Error al eliminar.");
                 }
             } catch (err) {
-                console.error("[CLIENTE] Fallo crítico al eliminar el servicio:", err);
-                setError("Fallo crítico en la conexión con el servidor.");
+                console.error(err);
+                setError("Fallo crítico al eliminar.");
             } finally {
                 setLoading(false);
             }
         }
     };
 
-    if (loading && services.length === 0) return (<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>);
+    // Handler de actualzación de solicitudes
+    const handleUpdateStatus = async (id_solicitud: number, nuevoEstado: Solicitud['estado']) => {
+        if (loading) return;
+        setLoading(true);
+        setError(null);
+        setSuccessMessage(null);
 
+        try {
+            const result: CrudResult<Solicitud> = await actualizarEstadoSolicitud(id_solicitud, nuevoEstado);
+
+            if (result.success && result.data) {
+                setRequests(prevRequests => 
+                    prevRequests.map(req => 
+                        req.id_solicitud === id_solicitud ? result.data! : req
+                    )
+                );
+                setSuccessMessage(result.message || "Estado actualizado.");
+            } else {
+                setError(result.message || "No se pudo actualizar el estado.");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Error de conexión al actualizar solicitud.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    if (loading && services.length === 0 && requests.length === 0) 
+        return (<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>);
+
+    // Contenido Pestaña Servicios
     const serviceListTabContent = (
         <Box sx={{ p: 3, position: 'relative' }}>
-            {error && <Alert severity="error" sx={{ mb: 2 }}>Operación fallida: {error}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
 
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-
-                {/* TÍTULO DE LA LISTA */}
                 <Typography variant="h6">Servicios Disponibles ({services.length})</Typography>
-
-                {/* BOTÓN ESTÁNDAR DE CREACIÓN */}
                 <Button
                     variant="contained"
                     color={'error'}
-                    onClick={handleOpenCreateDialog} // Misma lógica
-                    disabled={loading || isSaving} // Misma lógica
-                    startIcon={<AddIcon />} // Icono
+                    onClick={handleOpenCreateDialog}
+                    disabled={loading || isSaving}
+                    startIcon={<AddIcon />}
                     sx={{ textTransform: 'none' }}
                 >
                     Crear Nuevo Servicio
                 </Button>
             </Box>
 
-            {/* LISTA DE RESULTADOS (SIN CAMBIOS) */}
             {services.length === 0 ? (
                 <Alert severity="info">No hay servicios maestros registrados.</Alert>
             ) : isMobile ? (
@@ -247,25 +276,25 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     return (
         <Paper elevation={1} sx={{ p: 0, borderRadius: 2, maxWidth: '1400px', margin: '0 auto', overflow: 'hidden' }}>
-            {/* Cabecera de Pestañas Internas */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: '#f5f5f5' }}>
-                <Tabs value={internalTabIndex} onChange={handleInternalTabChange} aria-label="internal service management tabs">
+                <Tabs value={internalTabIndex} onChange={handleInternalTabChange} aria-label="internal tabs">
                     <Tab label="Servicios Disponibles" />
                     <Tab label="Solicitudes Entrantes" />
                 </Tabs>
             </Box>
 
-            {/* Contenido de Pestañas Internas */}
             {internalTabIndex === 0 && serviceListTabContent}
 
+            {/* Pestaña Solicitudes */}
             {internalTabIndex === 1 && (
                 <RequestListTab
-                    requests={initialRequests ?? []}
+                    requests={requests}
                     error={initialRequestError}
+                    loading={loading}
+                    onUpdateStatus={handleUpdateStatus}
                 />
             )}
 
-            {/* DIÁLOGO DE EDICIÓN/CREACIÓN */}
             <ServiceEditDialog
                 open={openEditDialog}
                 isNew={!currentEditingService}
