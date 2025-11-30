@@ -1,0 +1,5 @@
+  // 1. Tarea especifica. -> General -> mostrar las noticias/eventos de la base de datos en la UI -> especifica -> paso pequeños y medibles -> [traer los datos de la base datos]
+    // 2. Herramientas tengo? -> todo lo de la carrera, y si no sabes buscar el lenguaje (ts) / react ().
+    // 3. Donde o como guardo (tipos/estrucutras/enums/clases lo que sea) mi informacion -> veriables.
+    // 4. ir por los datos -> como hacemos esos?
+    // 5. Guardar los datos -> usar variables
