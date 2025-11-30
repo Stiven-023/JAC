@@ -18,7 +18,6 @@ export type Noticia = {
   fecha_publicacion: string
 }
 
-// Join con residents para taer el nombre
 export type NoticiaConResidente = Noticia & {
   residents: {
     full_name: string;

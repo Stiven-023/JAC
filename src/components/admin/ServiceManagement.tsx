@@ -201,19 +201,26 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
         <Box sx={{ p: 3, position: 'relative' }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>Operación fallida: {error}</Alert>}
             {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
+
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+
+                {/* TÍTULO DE LA LISTA */}
                 <Typography variant="h6">Servicios Disponibles ({services.length})</Typography>
+
+                {/* BOTÓN ESTÁNDAR DE CREACIÓN */}
                 <Button
                     variant="contained"
                     color={'error'}
-                    onClick={handleOpenCreateDialog} 
-                    disabled={loading || isSaving}
-                    startIcon={<AddIcon />} 
+                    onClick={handleOpenCreateDialog} // Misma lógica
+                    disabled={loading || isSaving} // Misma lógica
+                    startIcon={<AddIcon />} // Icono
                     sx={{ textTransform: 'none' }}
                 >
                     Crear Nuevo Servicio
                 </Button>
             </Box>
+
+            {/* LISTA DE RESULTADOS (SIN CAMBIOS) */}
             {services.length === 0 ? (
                 <Alert severity="info">No hay servicios maestros registrados.</Alert>
             ) : isMobile ? (
@@ -240,7 +247,7 @@ export const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     return (
         <Paper elevation={1} sx={{ p: 0, borderRadius: 2, maxWidth: '1400px', margin: '0 auto', overflow: 'hidden' }}>
-
+            {/* Cabecera de Pestañas Internas */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: '#f5f5f5' }}>
                 <Tabs value={internalTabIndex} onChange={handleInternalTabChange} aria-label="internal service management tabs">
                     <Tab label="Servicios Disponibles" />
