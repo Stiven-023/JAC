@@ -1,12 +1,17 @@
-import { Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Paper, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import React, { useState, useTransition } from 'react'
 import { Add, Edit, Delete, Visibility } from '@mui/icons-material'
 import SearchIcon from "@mui/icons-material/Search";
+import { createEvento, deleteEvento, Evento as TypeEvento, updateEvento} from '../../lib/admin/eventos';
 
 interface FormData {
   resident_id: string
   titulo: string
   descripcion?:string,
+  fecha_publicacion: string,
+  fecha_evento:string,
+  rango_horario:string,
+  lugar:string
 
 }
 
@@ -17,36 +22,48 @@ interface AlertState {
 }
 
 interface Evento {
-    id_avento:number,
+    id_evento:number,
     resident_id: string,
     titulo:string,
-    descripcion:string,
+    descripcion?:string,
     fecha_publicacion: string,
     fecha_evento:string,
     rango_horario:string,
     lugar:string
 }
 
-const Eventos = () => {
+const Eventos = ({initialEventos}:{initialEventos : TypeEvento[]}) => {
 
  const [openDialog, setOpenDialog] = useState<boolean>(false)
  const [currentEvento, setCurrentEvento] = useState<Evento | null >(null)
+ const [openViewDialog, setOpenViewDialog] = useState<boolean>(false)
  const [formData, setFormData] = useState<FormData>({
-     resident_id: '',
-     titulo: '',
-     descripcion: '',
+      resident_id: '',
+      titulo: '',
+      descripcion: '',
+      fecha_publicacion: '',
+      fecha_evento: '',
+      rango_horario: '',
+      lugar: ''
    })
 const [isPending, startTransition] = useTransition()
 
-  const handleOpenDialog = (evento: Evento | null = null) => {
+const handleOpenDialog = (evento: Evento | null = null) => {
     if (evento) {
       setFormData({
-        resident_id: evento.resident_id,
-        titulo: evento.titulo
+        ...evento,
+        fecha_publicacion: evento.fecha_publicacion
       })
       setCurrentEvento(evento)
     } else {
-      setFormData({ resident_id: '', titulo: '', descripcion: '' })
+      setFormData({ 
+      resident_id: '',
+      titulo: '',
+      descripcion: '',
+      fecha_publicacion: '',
+      fecha_evento: '',
+      rango_horario: '',
+      lugar: ''})
       setCurrentEvento(null)
     }
     setOpenDialog(true)
@@ -56,18 +73,7 @@ const handleCloseDialog = () => {
     setOpenDialog(false)
 }
 
- const eventos = [
-    {
-        id_avento:1,
-        resident_id: 'a1fe0bbd-3396-41af-9315-ce3a54369e5b',
-        titulo:'Fiesta de navidad',
-        descripcion:'Fiesta de navidad ',
-        fecha_publicacion:'30-11-2025',
-        fecha_evento:'24-12-2025',
-        rango_horario:'10:00 p.m',
-        lugar:'Salon comunal'
-    }
-];
+ const eventos = initialEventos ?? [];
 
  const [alert, setAlert] = useState<AlertState>({ 
     show: false, 
@@ -80,23 +86,89 @@ const showAlert = (message: string, severity: 'success' | 'error' = 'success') =
   }
 
 const handleSubmit = async () => {
-    if (!formData.titulo || !formData.descripcion || !formData.resident_id) {
-      showAlert('Por favor completa todos los campos', 'error')
-      return
+if (!formData.titulo || !formData.descripcion || !formData.resident_id || !formData.fecha_publicacion || !formData.fecha_evento || !formData.rango_horario || !formData.lugar) {
+showAlert('Por favor completa todos los campos', 'error')
+return
+}
+
+
+startTransition(async () => {
+try {
+let res
+
+
+if (currentEvento) {
+res = await updateEvento(currentEvento.id_evento, formData)
+
+} else { 
+res = await createEvento(formData)
+}
+
+
+if (!res.success) {
+showAlert(res.error || 'Ocurrió un error en el servidor', 'error')
+return
+}
+
+
+showAlert("Evento guardado correctamente")
+handleCloseDialog()
+} catch (err) {
+console.error(err)
+showAlert('Error inesperado al guardar el evento', 'error')
+}
+})
+}
+
+  const handleCloseAlert = () => {
+    setAlert({ ...alert, show: false })
+  }
+
+  const handleViewEvento = (evento: Evento) => {
+      setCurrentEvento(evento)
+      setOpenViewDialog(true)
     }
 
-    startTransition(async () => {
-      try {
-        handleCloseDialog()
-      } catch (error) {
-        showAlert('Error inesperado al guardar la noticia', 'error')
-        console.error(error)
-      }
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     })
   }
+
+
+const handleDelete = async (evento: Evento) => {
+if (!confirm('¿Seguro que deseas eliminar este evento?')) return;
+
+
+startTransition(async () => {
+const res = await deleteEvento(evento.id_evento)
+if (!res.success) {
+showAlert(res.error || 'Error eliminando evento', 'error')
+return
+}
+showAlert('Evento eliminado')
+})
+}
+
+  
   return (
     <>
       <Box sx={{ p: {}, maxWidth:'1400px',margin: '0 auto', backgroundColor: '#fafafa'}}>
+              <Snackbar
+                open={alert.show}
+                autoHideDuration={3000}
+                onClose={handleCloseAlert}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              >
+                <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
+                  {alert.message}
+                </Alert>
+              </Snackbar>
+
          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, gap:4}}>
         <TextField
                     placeholder="Buscar por titulo"
@@ -120,7 +192,7 @@ const handleSubmit = async () => {
           startIcon={<Add />}
           onClick={() => handleOpenDialog()}
           size="large"
-        //   disabled={isPending}
+          disabled={isPending}
           color={'error'}
         >
           Nuevo evento
@@ -147,14 +219,14 @@ const handleSubmit = async () => {
                 <TableBody>
                   {eventos.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
-                        <Typography color="text.secondary">No hay noticias registradas</Typography>
+                      <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                        <Typography color="text.secondary">No hay eventos registrados</Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
                     eventos.map((evento) => (
-                      <TableRow key={evento.id_avento} hover>
-                        <TableCell>{evento.id_avento}</TableCell>
+                      <TableRow key={evento.id_evento} hover>
+                        <TableCell>{evento.id_evento}</TableCell>
                         <TableCell>
                           <Typography fontWeight="medium">{evento.titulo}</Typography>
                         </TableCell>
@@ -165,7 +237,7 @@ const handleSubmit = async () => {
                             variant="outlined"
                           />
                         </TableCell>
-                        <TableCell>{(evento.fecha_publicacion)}</TableCell>
+                        <TableCell>{formatDate(evento.fecha_publicacion)}</TableCell>
                         <TableCell>{(evento.fecha_evento)}</TableCell>
                         <TableCell>{(evento.rango_horario)}</TableCell>
                         <TableCell>{(evento.lugar)}</TableCell>
@@ -173,24 +245,24 @@ const handleSubmit = async () => {
                           <IconButton
                             color="info"
                             size="small"
-                            onClick={() => {}}
-                            // disabled={isPending}
+                            onClick={() => handleViewEvento(evento)}
+                            disabled={isPending}
                           >
                             <Visibility />
                           </IconButton>
                           <IconButton
                             color="primary"
                             size="small"
-                            onClick={() => {}}
-                            // disabled={isPending}
+                            onClick={() => handleOpenDialog(evento)}
+                            disabled={isPending}
                           >
                             <Edit />
                           </IconButton>
                           <IconButton
                             color="error"
                             size="small"
-                            onClick={() => {}}
-                            // disabled={isPending}
+                            onClick={() => handleDelete(evento)}
+                            disabled={isPending}
                           >
                             <Delete />
                           </IconButton>
@@ -213,7 +285,7 @@ const handleSubmit = async () => {
               value={formData.resident_id}
               onChange={(e) => setFormData({ ...formData, resident_id: e.target.value })}
               placeholder="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-            //   disabled={isPending}
+              disabled={isPending}
             />
             <TextField
               label="Título"
@@ -231,6 +303,38 @@ const handleSubmit = async () => {
               onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
               disabled={isPending}
             />
+            <TextField
+                label="Fecha de publicación"
+                type={currentEvento ? "text" : "date"}
+                value={formData.fecha_publicacion}
+                onChange={(e) => setFormData({ ...formData, fecha_publicacion: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+                disabled={currentEvento ? true : false}
+            />
+
+            <TextField
+                    label="Fecha del evento"
+                    type="date"
+                    value={formData.fecha_evento}
+                    onChange={(e) => setFormData({ ...formData, fecha_evento: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+              />
+
+              <TextField
+                    label="Rango horario (ejemplo: 2pm - 6pm)"
+                    value={formData.rango_horario}
+                    onChange={(e) => setFormData({ ...formData, rango_horario: e.target.value })}
+                    fullWidth
+                />
+
+                <TextField
+                    label="Lugar del evento"
+                    value={formData.lugar}
+                    onChange={(e) => setFormData({ ...formData, lugar: e.target.value })}
+                    fullWidth
+                />
           </Box>
         </DialogContent>
         <DialogActions>
@@ -246,7 +350,79 @@ const handleSubmit = async () => {
             {isPending ? 'Guardando...' : 'Guardar'}
           </Button>
         </DialogActions>
-      </Dialog>
+        </Dialog>
+
+        {/* Dialog Ver */}
+          <Dialog open={openViewDialog} onClose={() => setOpenViewDialog(false)} maxWidth="md" fullWidth>
+            <DialogTitle>Detalles del evento</DialogTitle>
+            <DialogContent>
+              {currentEvento && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      ID
+                    </Typography>
+                    <Typography variant="body1">{currentEvento.id_evento}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Título
+                    </Typography>
+                    <Typography variant="h6">{currentEvento.titulo}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Descripcion
+                    </Typography>
+                    <Typography variant="body1">{currentEvento.descripcion}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      UUID del Residente
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                      {currentEvento.resident_id}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Fecha de Publicación
+                    </Typography>
+                    <Typography variant="body1">
+                      {formatDate(currentEvento.fecha_publicacion)}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Fecha del evento
+                    </Typography>
+                    <Typography variant="body1">
+                      {formatDate(currentEvento.fecha_evento)}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Horario 
+                    </Typography>
+                    <Typography variant="body1">{currentEvento.rango_horario}</Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Lugar del evento
+                    </Typography>
+                    <Typography variant="body1">
+                      {(currentEvento.lugar)}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenViewDialog(false)}>Cerrar</Button>
+            </DialogActions>
+          </Dialog>
 
       </Box>
     </>
