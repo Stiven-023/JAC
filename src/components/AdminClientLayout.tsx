@@ -8,6 +8,7 @@ import { useState } from "react";
 import NoticiasTable from "./admin/NoticiasTable";
 import { NoticiaConResidente } from "@/lib/supabase";
 import Eventos from "./admin/Eventos";
+import { Evento } from "@/lib/admin/eventos";
 
 interface AdminClientLayoutProps {
     initialResidents: ResidenteAdmin[];
@@ -23,6 +24,9 @@ interface AdminClientLayoutProps {
     
     // PROPS DE NOTICIAS
     initialNoticias: NoticiaConResidente[];
+
+    // PROPS DE EVENTOS
+    initialEventos?: Evento[];
 }
 
 
@@ -33,7 +37,8 @@ export default function AdminClientLayout({
     serviceError,
     initialRequests, 
     requestError,
-    initialNoticias 
+    initialNoticias,
+    initialEventos 
 }: AdminClientLayoutProps) { 
 
     const [tabIndex, setTabIndex] = useState(0);
@@ -77,7 +82,7 @@ export default function AdminClientLayout({
                             )}
                             
                             {/* Eventos */}
-                            {tabIndex === 2 && <Eventos/>}
+                            {tabIndex === 2 && <Eventos initialEventos={initialEventos ?? []}/>}
                             
                             {/* Servicios y Solicitudes */}
                             {tabIndex === 3 && (

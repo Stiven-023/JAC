@@ -13,6 +13,7 @@ import AdminClientLayout from "@/components/AdminClientLayout";
 
 import { ActionResult, getNoticias } from '@/lib/admin/noticias';
 import { NoticiaConResidente } from '@/lib/supabase';
+import { ActionResultEvento, Evento, getEventos } from '@/lib/admin/eventos';
 
 export default async function AdminPage() {
     let initialResidents: ResidenteAdmin[] = [];
@@ -22,8 +23,8 @@ export default async function AdminPage() {
     let initialRequests: Solicitud[] = [];
     let requestError: string | null = null;
 
-    // 💡 Ajustar el tipo inicial para que refleje lo que getNoticias devuelve
     let initialNoticiasResult: ActionResult = { success: false, data: [] as NoticiaConResidente[] };
+    let initialEventosResult: ActionResultEvento = { success: false, data: [] as Evento[] };
 
     // Cargar Residentes
     try {
@@ -57,10 +58,24 @@ export default async function AdminPage() {
         initialNoticiasResult = { success: false, data: [], error: 'Error al cargar noticias.' };
     }
 
+    try {
+        initialEventosResult = await getEventos();
+        console.log(initialEventosResult)
+    } catch (error) {
+        console.error("Fallo al cargar eventos en AdminPage:", error);
+        initialNoticiasResult = { success: false, data: [], error: 'Error al cargar eventos.' };
+    }
+
     const initialNoticias: NoticiaConResidente[] =
         initialNoticiasResult.success && Array.isArray(initialNoticiasResult.data)
             ? initialNoticiasResult.data as NoticiaConResidente[]
             : [];
+    
+    const initialEventos: Evento[] =
+        initialEventosResult.success && Array.isArray(initialEventosResult.data)
+            ? initialEventosResult.data as Evento[]
+            : [];
+    
 
     return (
         <AdminClientLayout
@@ -71,6 +86,7 @@ export default async function AdminPage() {
             initialRequests={initialRequests}
             requestError={requestError}
             initialNoticias={initialNoticias}
+            initialEventos={initialEventos}
         />
     );
 }
