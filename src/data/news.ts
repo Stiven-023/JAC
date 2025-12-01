@@ -1,3 +1,4 @@
+// JAC/src/data/news.ts
 export interface NewsItem {
     id: string;
     title: string;
