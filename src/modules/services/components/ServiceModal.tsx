@@ -7,7 +7,12 @@ type Props = {
     servicio: ServicioType;
     open: boolean;
     onClose: () => void;
-    onApply?: (payload: { userId: string | null; serviceId: number; note?: string }) => Promise<void> | void;
+    onApply?: (payload: {
+        userId: string | null;
+        serviceId: number;
+        note: string;
+        address: string;
+    }) => Promise<void> | void;
 };
 
 export default function ServiceModal({ servicio, open, onClose, onApply }: Props) {
