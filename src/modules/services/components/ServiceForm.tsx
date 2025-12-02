@@ -87,6 +87,3 @@ export default function ServiceForm({
         </form>
     );
 }
-// Necesitas crear un componente que muestre los datos del servicio (tipo ya creado) -> botones de aplicar y cancelar
-// Necesitas un dialog para mostrar este componente (poder cerrar y el diago o cancelar)
-// action -> para hacer el insert en la tabla 'solicitud de servicio' (verificar nombre) -> id usuario, y los demas datos del servicio incluido el id
