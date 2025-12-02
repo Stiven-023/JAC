@@ -4,3 +4,8 @@ export type Event = {
     date: string;
     description: string
 };
+
+export interface ResponseEvents {
+    data: Event[];
+    totalPages: number;
+}

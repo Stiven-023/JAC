@@ -1,17 +1,10 @@
 import Card from "@/components/Card";
 import { obtenerEventos } from "@/modules/events/action";
-import { Event } from "@/modules/events/types";
+import Pagination from "@/modules/new/Pagination";
 
-export default async function Page() {
-    let events: Event[] = [];
-
-    try {
-        events = await obtenerEventos();
-    } catch (error) {
-        console.error("Error fetching events:", error);
-    }
-    console.log(events.length)
-    console.log(events)
+export default async function Page({ searchParams }: { searchParams?: { page?: string } }) {
+    const currentPage = Number(searchParams?.page) || 1;
+    const { data: events, totalPages } = await obtenerEventos(currentPage);
 
     return (
         <div className="flex flex-col justify-center items-center h-[78vh]">
@@ -34,6 +27,9 @@ export default async function Page() {
                 )}
             </div>
 
+            {totalPages > 1 && (
+                <Pagination totalpages={totalPages} />
+            )}
         </div>
     );
 }

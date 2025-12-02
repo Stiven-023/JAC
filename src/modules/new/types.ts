@@ -5,3 +5,8 @@ export type NewTypes = {
     description: string;
     date: string
 };
+
+export type ResponseNews = {
+    data: NewTypes[];
+    totalPages: number;
+}
