@@ -2,8 +2,32 @@
 
 import { supabase } from "@/lib/supabase";
 import { ServicioType, ResponseServicios } from "./types";
+import { Try } from "@mui/icons-material";
 
 const ITEMS_PER_PAGE = 2;
+export async function insertarDatos(residenId: string, idServicio: number, descripcion: string, direccion: string) {
+
+    try {
+        const { data, error } = await supabase
+            .from('solicitudes')
+            .insert({
+                resident_id: residenId,
+                id_servicio: idServicio,
+                descripcion: descripcion,
+                direccion: direccion
+
+            })
+        if (error) throw new Error("Error al cargar servicios.");
+        return data
+
+    } catch (e) {
+        console.error("Error:", e);
+        return { data: [] };
+
+    }
+
+
+}
 
 export async function obtenerServicios(page: number = 1): Promise<ResponseServicios> {
     const from = (page - 1) * ITEMS_PER_PAGE;
