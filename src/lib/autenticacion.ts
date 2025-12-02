@@ -103,7 +103,7 @@ export async function registrarUsuario(formData: FormData) {
     const { error: dbError } = await supabaseAdmin
       .from('residents')
       .insert({
-        id_residentes: userId, 
+        id_residentes: userId,
         full_name,
         document_number,
         contact_info,
@@ -144,7 +144,7 @@ export async function iniciarSesion(formData: FormData) {
   const supabase = createRouteHandlerClient({ cookies });
 
   // Iniciar sesión
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -154,9 +154,11 @@ export async function iniciarSesion(formData: FormData) {
     return { success: false, message: 'Credenciales inválidas o cuenta no confirmada.' };
   }
 
+  const userId = data.user?.id;
   // 3. Redirigir al usuario al dashboard principal
   return {
-    success: true
+    success: true,
+    userId: userId,
   };
 }
 
