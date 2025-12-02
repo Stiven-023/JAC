@@ -13,6 +13,7 @@ const menuItems = [
     { name: 'Administrador', href: '/admin' },
 ];
 
+
 export default function HomeHeader() {
     const [isOpen, setIsOpen] = useState(false);
     const toggelMenu = () => {
@@ -22,7 +23,7 @@ export default function HomeHeader() {
 
     const handleLogout = async () => {
         const result = await manejarCierreSesion();
-        
+
         if (result.success) {
             // Redirigir al login después de cerrar sesión
             router.push('/login');
