@@ -1,23 +1,32 @@
-import ServiceCard from "@/components/ServiceCard";
-import { FaTools } from 'react-icons/fa';
-import { FaCommentDots } from 'react-icons/fa';
-import { CgFileDocument } from 'react-icons/cg';
-import { AiOutlinePlusCircle } from 'react-icons/ai';
+import { obtenerServicios } from "@/modules/services/action";
+import Pagination from "@/modules/new/Pagination";
+import ServiceItem from "@/modules/services/components/ServiceItem";
+import { ServicioType, ResponseServicios } from "../../../modules/services/types";
 
-export default function Page() {
+export default async function ServiciosPage({
+    searchParams
+}: {
+    searchParams: { page?: string };
+}) {
+    const currentPage = Number(searchParams.page) || 1;
+
+    // 👇 Tipado explícito para evitar el error
+    const { data: servicios, totalPages }: ResponseServicios =
+        await obtenerServicios(currentPage);
+
     return (
-        <div className="flex flex-col justify-center items-center h-[78vh]">
-            <div>
-            <h1 className="mb-6 text-center text-3xl font-black tracking-tight text-[#0f0f0f]">Servicios</h1>
-            <div className="grid grid-cols-1 gap-4 px-6 text-sm 
-                      md:grid-cols-2 md:px-10 md:text-base 
-                      lg:grid-cols-2 lg:px-32 lg:text-sm">
-                <ServiceCard icon={FaTools} title="Solicitud de mantenimiento" description="Reporta daños o solicita mantenimiento en las zonas comunes para asegurar un uso seguro." />
-                <ServiceCard icon={FaCommentDots} title="Canal de sugerencias" description="Envía comentarios e ideas para mejorar los servicios y espacios comunitarios." />
-                <ServiceCard icon={CgFileDocument} title="Trámites y documentos" description="Solicita certificados, constancias u otros documentos emitidos por la JAC." />
-                <ServiceCard icon={AiOutlinePlusCircle} title="Nuevos proyectos" description="Propón y haz seguimiento a iniciativas que beneficien al barrio." />
+        <div className="max-w-4xl mx-auto p-4 py-30">
+            <h1 className="text-2xl font-bold mb-6">Servicios Disponibles</h1>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {servicios.map((servicio: ServicioType) => (
+                    <ServiceItem key={servicio.id} servicio={servicio} />
+                ))}
             </div>
-            </div>
+
+            {totalPages > 1 && (
+                <Pagination totalpages={totalPages} currentPage={currentPage} />
+            )}
         </div>
     );
 }

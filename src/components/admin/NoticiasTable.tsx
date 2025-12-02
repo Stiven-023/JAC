@@ -27,10 +27,10 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { Add, Edit, Delete, Visibility } from '@mui/icons-material'
 import { createNoticia, updateNoticia, deleteNoticia } from '../../lib/admin/noticias'
-import type { Noticia } from '@/lib/supabase'
+import type { NoticiaConResidente } from '@/lib/supabase'
 
 interface NoticiasTableProps {
-  initialNoticias: Noticia[]
+  initialNoticias: NoticiaConResidente[]
 }
 
 interface FormData {
@@ -45,25 +45,22 @@ interface AlertState {
   severity: 'success' | 'error'
 }
 
-export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) {
-  const [noticias, setNoticias] = useState<Noticia[]>(initialNoticias)
+export default function NoticiasTable({ initialNoticias }: NoticiasTableProps) {
+  const [noticias, setNoticias] = useState<NoticiaConResidente[]>(initialNoticias)
   const [openDialog, setOpenDialog] = useState<boolean>(false)
   const [openViewDialog, setOpenViewDialog] = useState<boolean>(false)
-  const [currentNoticia, setCurrentNoticia] = useState<Noticia | null>(null)
+  const [currentNoticia, setCurrentNoticia] = useState<NoticiaConResidente | null>(null)
   const [formData, setFormData] = useState<FormData>({
     resident_id: '',
     titulo: '',
     contenido: '',
   })
 
-  
-
-  
   const [isPending, startTransition] = useTransition()
-  const [alert, setAlert] = useState<AlertState>({ 
-    show: false, 
-    message: '', 
-    severity: 'success' 
+  const [alert, setAlert] = useState<AlertState>({
+    show: false,
+    message: '',
+    severity: 'success'
   })
 
   const showAlert = (message: string, severity: 'success' | 'error' = 'success') => {
@@ -74,7 +71,7 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
     setAlert({ ...alert, show: false })
   }
 
-  const handleOpenDialog = (noticia: Noticia | null = null) => {
+  const handleOpenDialog = (noticia: NoticiaConResidente | null = null) => {
     if (noticia) {
       setFormData({
         resident_id: noticia.resident_id,
@@ -95,7 +92,7 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
     setFormData({ resident_id: '', titulo: '', contenido: '' })
   }
 
-  const handleViewNoticia = (noticia: Noticia) => {
+  const handleViewNoticia = (noticia: NoticiaConResidente) => {
     setCurrentNoticia(noticia)
     setOpenViewDialog(true)
   }
@@ -111,9 +108,9 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
         if (currentNoticia) {
           const result = await updateNoticia(currentNoticia.id_noticia, formData)
           if (result.success && result.data) {
-            setNoticias(noticias.map((n) => 
-              n.id_noticia === currentNoticia.id_noticia 
-                ? result.data as Noticia
+            setNoticias(noticias.map((n) =>
+              n.id_noticia === currentNoticia.id_noticia
+                ? result.data as NoticiaConResidente
                 : n
             ))
             showAlert('Noticia actualizada exitosamente')
@@ -123,7 +120,7 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
         } else {
           const result = await createNoticia(formData)
           if (result.success && result.data) {
-            setNoticias([result.data as Noticia, ...noticias])
+            setNoticias([result.data as NoticiaConResidente, ...noticias])
             showAlert('Noticia creada exitosamente')
           } else {
             showAlert(result.error || 'Error al crear', 'error')
@@ -179,24 +176,24 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
         </Alert>
       </Snackbar>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, gap:4}}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, gap: 4 }}>
         <TextField
-                    placeholder="Buscar por titulo"
-                    size="small"
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon sx={{ color: '#757575', fontSize: '20px' }} />
-                            </InputAdornment>
-                        )
-                    }}
-                    sx={{
-                        flex: 1,
-                        '& .MuiOutlinedInput-root': {
-                            backgroundColor: 'white'
-                        }
-                    }}
-                />
+          placeholder="Buscar por titulo"
+          size="small"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: '#757575', fontSize: '20px' }} />
+              </InputAdornment>
+            )
+          }}
+          sx={{
+            flex: 1,
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'white'
+            }
+          }}
+        />
         <Button
           variant="contained"
           startIcon={<Add />}
@@ -213,18 +210,14 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: '#fafafa' }}>
-              <TableCell sx={{ color: '#000', fontWeight: 'bold' }}>ID</TableCell>
-              <TableCell sx={{ color: '#000', fontWeight: 'bold' }}>Título</TableCell>
-              <TableCell sx={{ color: '#000', fontWeight: 'bold' }}>Residente</TableCell>
-              <TableCell sx={{ color: '#000', fontWeight: 'bold' }}>Fecha</TableCell>
-              <TableCell sx={{ color: '#000', fontWeight: 'bold' }} align="center">
+              <TableCell sx={{ color: '#000', fontWeight: 'bold' }}>ID</TableCell><TableCell sx={{ color: '#000', fontWeight: 'bold' }}>Título</TableCell><TableCell sx={{ color: '#000', fontWeight: 'bold' }}>Residente</TableCell><TableCell sx={{ color: '#000', fontWeight: 'bold' }}>Fecha</TableCell><TableCell sx={{ color: '#000', fontWeight: 'bold' }} align="center">
                 Acciones
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {noticias.length === 0 ? (
-              <TableRow>
+              < TableRow >
                 <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">No hay noticias registradas</Typography>
                 </TableCell>
@@ -232,19 +225,19 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
             ) : (
               noticias.map((noticia) => (
                 <TableRow key={noticia.id_noticia} hover>
-                  <TableCell>{noticia.id_noticia}</TableCell>
-                  <TableCell>
+                  <TableCell>{noticia.id_noticia}</TableCell><TableCell>
                     <Typography fontWeight="medium">{noticia.titulo}</Typography>
-                  </TableCell>
-                  <TableCell>
+                  </TableCell><TableCell>
                     <Chip
-                      label={noticia.resident_id.substring(0, 8) + '...'}
+                      label={
+                        noticia.residents
+                          ? noticia.residents.full_name
+                          : 'N/A'
+                      }
                       size="small"
                       variant="outlined"
                     />
-                  </TableCell>
-                  <TableCell>{formatDate(noticia.fecha_publicacion)}</TableCell>
-                  <TableCell align="center">
+                  </TableCell><TableCell>{formatDate(noticia.fecha_publicacion)}</TableCell><TableCell align="center">
                     <IconButton
                       color="info"
                       size="small"
@@ -349,12 +342,20 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
               </Box>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">
+                  Publicado por
+                </Typography>
+                <Typography variant="body1">
+                  {currentNoticia.residents ? currentNoticia.residents.full_name : 'Usuario Desconocido'}
+                </Typography>
+              </Box>
+              {/*<Box>
+                <Typography variant="subtitle2" color="text.secondary">
                   UUID del Residente
                 </Typography>
                 <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
                   {currentNoticia.resident_id}
                 </Typography>
-              </Box>
+              </Box>*/}
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">
                   Fecha de Publicación
@@ -370,6 +371,6 @@ export default  function NoticiasTable({ initialNoticias }: NoticiasTableProps) 
           <Button onClick={() => setOpenViewDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Box >
   )
 }
