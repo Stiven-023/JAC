@@ -1,5 +1,3 @@
-// app/home/admin/page.tsx (Server Component)
-
 import {
     obtenerListaResidentesAdmin,
     obtenerListaServiciosAdmin,
@@ -13,11 +11,13 @@ import AdminClientLayout from "@/components/AdminClientLayout";
 
 import { ActionResult, getNoticias } from '@/lib/admin/noticias';
 import { NoticiaConResidente } from '@/lib/supabase';
-import { ActionResultEvento, Evento, getEventos } from '@/lib/admin/eventos';
+import { ActionResultEvento, Evento, Inscripcion, getEventos, obtenerInscripcionesAdmin } from '@/lib/admin/eventos'; 
 
 export default async function AdminPage() {
+
+
     let initialResidents: ResidenteAdmin[] = [];
-    let initialError: string | null = null;
+    let initialError: string | null = null; 
     let initialServices: ServicioDisponible[] = [];
     let serviceError: string | null = null;
     let initialRequests: Solicitud[] = [];
@@ -25,6 +25,8 @@ export default async function AdminPage() {
 
     let initialNoticiasResult: ActionResult = { success: false, data: [] as NoticiaConResidente[] };
     let initialEventosResult: ActionResultEvento = { success: false, data: [] as Evento[] };
+    let initialInscripciones: Inscripcion[] = []; 
+    
 
     // Cargar Residentes
     try {
@@ -59,11 +61,16 @@ export default async function AdminPage() {
     }
 
     try {
-        initialEventosResult = await getEventos();
-        console.log(initialEventosResult)
+        const [eventosRes, inscripcionesRes] = await Promise.all([
+            getEventos(),
+            obtenerInscripcionesAdmin()
+        ]);
+        
+        initialEventosResult = eventosRes;
+        initialInscripciones = inscripcionesRes;
+
     } catch (error) {
         console.error("Fallo al cargar eventos en AdminPage:", error);
-        initialNoticiasResult = { success: false, data: [], error: 'Error al cargar eventos.' };
     }
 
     const initialNoticias: NoticiaConResidente[] =
@@ -75,7 +82,6 @@ export default async function AdminPage() {
         initialEventosResult.success && Array.isArray(initialEventosResult.data)
             ? initialEventosResult.data as Evento[]
             : [];
-    
 
     return (
         <AdminClientLayout
@@ -87,6 +93,7 @@ export default async function AdminPage() {
             requestError={requestError}
             initialNoticias={initialNoticias}
             initialEventos={initialEventos}
+            initialInscripciones={initialInscripciones} 
         />
     );
 }

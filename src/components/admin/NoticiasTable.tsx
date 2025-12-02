@@ -232,7 +232,7 @@ export default function NoticiasTable({ initialNoticias }: NoticiasTableProps) {
                       label={
                         noticia.residents
                           ? noticia.residents.full_name
-                          : 'N/A' // Fallback si la relación no existe
+                          : 'N/A'
                       }
                       size="small"
                       variant="outlined"
@@ -348,14 +348,14 @@ export default function NoticiasTable({ initialNoticias }: NoticiasTableProps) {
                   {currentNoticia.residents ? currentNoticia.residents.full_name : 'Usuario Desconocido'}
                 </Typography>
               </Box>
-              <Box>
+              {/*<Box>
                 <Typography variant="subtitle2" color="text.secondary">
                   UUID del Residente
                 </Typography>
                 <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
                   {currentNoticia.resident_id}
                 </Typography>
-              </Box>
+              </Box>*/}
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">
                   Fecha de Publicación
