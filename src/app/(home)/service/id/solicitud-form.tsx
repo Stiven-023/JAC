@@ -1,5 +1,6 @@
 'use client';
 
+import React from "react";
 import { useState } from "react";
 import { crearNuevaSolicitud } from "@/lib/admin/requests";
 
@@ -10,9 +11,7 @@ export default function SolicitudForm({ idServicio }: { idServicio: number }) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
-    // Simulas obtener el usuario autenticado
-    // En tu app real lo cambiarás por tu session.user.id
-    const residentId = "USER123"; // <-- cámbialo según tu auth
+    const residentId = "USER123";
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -27,7 +26,7 @@ export default function SolicitudForm({ idServicio }: { idServicio: number }) {
         const res = await crearNuevaSolicitud(formData, residentId);
 
         setLoading(false);
-        setMessage(res.message);
+        setMessage(res.message ?? "");
     }
 
     return (
