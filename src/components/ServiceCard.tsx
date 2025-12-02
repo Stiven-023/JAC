@@ -18,9 +18,9 @@ export default function ServiceCard({
                 <h2 className="font-bold">{title}</h2>
             </div>
             <p>{description}</p>
-            <div className="flex justify-end">
+            {/* <div className="flex justify-end">
                 <span className="hover:underline">Leer mas</span>
-            </div>
+            </div> */}
         </div>
     );
 }

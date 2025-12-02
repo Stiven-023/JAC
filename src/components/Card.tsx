@@ -50,11 +50,11 @@ export default function Card({
                 )}
             </div>
 
-            <div className="flex justify-end mt-auto">
+            {/* <div className="flex justify-end mt-auto">
                 <span className="hover:underline cursor-pointer">
                     Leer más
                 </span>
-            </div>
+            </div> */}
         </div>
     );
 

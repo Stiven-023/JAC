@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
+import {
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Chip, Box, Typography, IconButton, Menu, MenuItem, ListItemIcon, ListItemText
 } from '@mui/material';
 
@@ -13,7 +13,7 @@ import UndoIcon from '@mui/icons-material/Undo';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-import { Solicitud } from '@/lib/adminActions'; 
+import { Solicitud } from '@/lib/adminActions';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -43,7 +43,7 @@ const getStatusLabel = (estado: Solicitud['estado']) => {
 };
 
 export const RequestTable: React.FC<RequestTableProps> = ({ requests, loading, onUpdateStatus, onDelete }) => {
-    
+
     // Estado para el menú desplegable
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedRequest, setSelectedRequest] = useState<Solicitud | null>(null);
@@ -94,9 +94,9 @@ export const RequestTable: React.FC<RequestTableProps> = ({ requests, loading, o
                     </TableHead>
                     <TableBody>
                         {requests.map((request) => (
-                            <TableRow 
-                                key={request.id_solicitud} 
-                                hover 
+                            <TableRow
+                                key={request.id_solicitud}
+                                hover
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <TableCell component="th" scope="row">{request.id_solicitud}</TableCell>
@@ -116,10 +116,10 @@ export const RequestTable: React.FC<RequestTableProps> = ({ requests, loading, o
                                     </Box>
                                 </TableCell>
                                 <TableCell>
-                                    <Chip 
-                                        label={getStatusLabel(request.estado)} 
-                                        color={getStatusColor(request.estado)} 
-                                        size="small" 
+                                    <Chip
+                                        label={getStatusLabel(request.estado)}
+                                        color={getStatusColor(request.estado)}
+                                        size="small"
                                         variant="outlined"
                                     />
                                 </TableCell>

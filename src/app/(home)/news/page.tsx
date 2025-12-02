@@ -1,19 +1,11 @@
 import Card from "@/components/Card";
-import { newsData } from "@/data/news";
 import { obtenerNoticias } from "@/modules/new/action";
-import { NewTypes } from "@modules/new/types"
+import Pagination from "@modules/new/Pagination"
 
 
-export default async function Page() {
-    let news: NewTypes[] = [];
-
-    try {
-        news = await obtenerNoticias();
-    } catch (error) {
-        console.error("Error fetching events:", error);
-    }
-    console.log(news.length)
-    console.log(news)
+export default async function Page({ searchParams }: { searchParams?: { page?: string } }) {
+    const currentPage = Number(searchParams?.page) || 1;
+    const { data: news, totalPages } = await obtenerNoticias(currentPage);
 
     return (
         <div className="flex flex-col justify-center items-center h-[78vh]">
@@ -30,6 +22,10 @@ export default async function Page() {
                     />
                 ))}
             </div>
+
+            {totalPages > 1 && (
+                <Pagination totalpages={totalPages} />
+            )}
         </div>
     );
 }
