@@ -23,9 +23,12 @@
         "name": "next"
       }
     ],
-    "paths": {  
+    "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
       ],
     }
   },

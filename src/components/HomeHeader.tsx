@@ -6,11 +6,11 @@ import { useRouter } from 'next/navigation';
 import { manejarCierreSesion } from '@/app/login/action';
 
 const menuItems = [
-    { name: 'Inicio', href: '/home' },
     { name: 'Noticias', href: '/news' },
     { name: 'Eventos', href: '/events' },
     { name: 'Servicios', href: '/service' },
     { name: 'Contacto', href: '/contact' },
+    { name: 'Administrador', href: '/admin' },
 ];
 
 export default function HomeHeader() {
