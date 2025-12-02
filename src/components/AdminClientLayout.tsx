@@ -8,7 +8,8 @@ import { useState } from "react";
 import NoticiasTable from "./admin/NoticiasTable";
 import { NoticiaConResidente } from "@/lib/supabase";
 import Eventos from "./admin/Eventos";
-import { Evento } from "@/lib/admin/eventos";
+import { Evento, Inscripcion } from "@/lib/admin/eventos";
+
 
 interface AdminClientLayoutProps {
     initialResidents: ResidenteAdmin[];
@@ -25,8 +26,9 @@ interface AdminClientLayoutProps {
     // PROPS DE NOTICIAS
     initialNoticias: NoticiaConResidente[];
 
-    // PROPS DE EVENTOS
-    initialEventos?: Evento[];
+    // PROPS DE EVENTOS 
+    initialEventos: Evento[];
+    initialInscripciones: Inscripcion[];
 }
 
 
@@ -38,7 +40,8 @@ export default function AdminClientLayout({
     initialRequests, 
     requestError,
     initialNoticias,
-    initialEventos 
+    initialEventos,
+    initialInscripciones
 }: AdminClientLayoutProps) { 
 
     const [tabIndex, setTabIndex] = useState(0);
@@ -61,10 +64,10 @@ export default function AdminClientLayout({
                                 variant="scrollable"
                                 scrollButtons="auto"
                             >
-                                <Tab label={"Usuarios"} />     
-                                <Tab label={"Noticias"} />       
-                                <Tab label={"Eventos"} />        
-                                <Tab label={"Servicios"} />      
+                                <Tab label={"Usuarios"} /> 
+                                <Tab label={"Noticias"} /> 
+                                <Tab label={"Eventos"} />
+                                <Tab label={"Servicios"} />
                             </Tabs>
                         </Box>
                         <Box sx={{ padding: 2 }} style={{ maxWidth: '-webkit-fill-available' }}>
@@ -76,13 +79,18 @@ export default function AdminClientLayout({
                                 />
                             )}
                             
-                            {/*  Noticias */}
+                            {/*  Noticias */}
                             {tabIndex === 1 && (
                                 <NoticiasTable initialNoticias={initialNoticias} />
                             )}
                             
                             {/* Eventos */}
-                            {tabIndex === 2 && <Eventos initialEventos={initialEventos ?? []}/>}
+                            {tabIndex === 2 && (
+                                <Eventos 
+                                    initialEventos={initialEventos} 
+                                    initialInscripciones={initialInscripciones}
+                                />
+                            )}
                             
                             {/* Servicios y Solicitudes */}
                             {tabIndex === 3 && (
