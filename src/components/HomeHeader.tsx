@@ -1,38 +1,63 @@
 'use client'
 import { FaHome } from 'react-icons/fa';
 import Link from 'next/link'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { manejarCierreSesion } from '@/app/login/action';
+import { createClientComponentClient, Session } from '@supabase/auth-helpers-nextjs';
 
 const menuItems = [
     { name: 'Noticias', href: '/news' },
     { name: 'Eventos', href: '/events' },
     { name: 'Servicios', href: '/service' },
     { name: 'Contacto', href: '/contact' },
-    { name: 'Administrador', href: '/admin' },
 ];
 
+const ADMIN_EMAIL = 'admin@jac.com.co';
 
 export default function HomeHeader() {
+    
     const [isOpen, setIsOpen] = useState(false);
-    const toggelMenu = () => {
-        setIsOpen(!isOpen)
-    }
-    const router = useRouter();
 
-    const handleLogout = async () => {
-        const result = await manejarCierreSesion();
+    const supabase = createClientComponentClient();
+  
+  // Estado para guardar la sesión
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
 
-        if (result.success) {
-            // Redirigir al login después de cerrar sesión
-            router.push('/login');
-            router.refresh(); // Refrescar para limpiar el estado
-        } else {
-            // Mostrar mensaje de error
-            alert(result.message);
+  
+  // Efecto para obtener la sesión al cargar el componente
+  useEffect(() => {
+      // Función asíncrona para obtener la sesión
+      const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data?.session);
+    };
+
+
+    // Llama a la función para obtener la sesión
+    getSession();
+    
+}, []);
+
+const toggelMenu = () => {
+    setIsOpen(!isOpen)
+}
+const router = useRouter();
+
+const handleLogout = async () => {
+    const result = await manejarCierreSesion();
+    
+    if (result.success) {
+        // Redirigir al login después de cerrar sesión
+        router.push('/login');
+        router.refresh(); // Refrescar para limpiar el estado
+    } else {
+        // Mostrar mensaje de error
+        alert(result.message);
         }
     };
+    const isAdmin = session?.user?.email === ADMIN_EMAIL;
+
     const openIcon = (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu-icon lucide-menu"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>)
     const closeIcon = (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>)
     return (
@@ -62,6 +87,12 @@ export default function HomeHeader() {
                             </Link>
                         )
                     })}
+                    {
+                     isAdmin && (
+                    <Link  className="px-2 py-1 rounded-xl transition duration-200 border-2 border-transparent hover:border-white" href={'/admin'}>
+                        Administrador
+                    </Link>)
+                    }
                     <div onClick={handleLogout} className='cursor-pointer'>
                         Cerrar Sesión
                     </div>
@@ -77,6 +108,12 @@ export default function HomeHeader() {
                             </Link>
                         )
                     })}
+                    {
+                     isAdmin && (
+                    <Link  className="px-2 py-1 rounded-xl transition duration-200 border-2 border-transparent hover:border-white" href={'/admin'}>
+                        Administrador
+                    </Link>)
+                    }
                     <div onClick={handleLogout} className='cursor-pointer'>
                         Cerrar Sesión
                     </div>
